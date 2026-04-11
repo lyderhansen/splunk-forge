@@ -3,7 +3,7 @@
   "description": "FAKE_DATA — A-to-Z Claude Code plugin for generating synthetic Splunk data. Research log formats, scaffold generators, produce realistic events from a user-defined fictional world.",
   "version": "0.0.1",
   "author": {
-    "name": "Joe Hanse"
+    "name": "lyder"
   },
   "license": "MIT",
   "keywords": [
