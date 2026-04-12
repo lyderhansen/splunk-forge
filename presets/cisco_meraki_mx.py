@@ -30,7 +30,7 @@ PRESET = {
     "sourcetype": {
         "name": "meraki:securityappliance",
         "confidence": 0.95,
-        "origin": "Splunkbase TA (app #4411) — Cisco Meraki Add-on for Splunk",
+        "origin": "Splunkbase TA (app #5580) — Cisco Meraki Add-on for Splunk",
     },
 
     "fields": [
@@ -95,7 +95,7 @@ PRESET = {
     "research_metadata": {
         "sources_consulted": [
             {"url": "https://documentation.meraki.com/General_Administration/Monitoring_and_Reporting/Syslog_Event_Types_and_Log_Samples", "kind": "vendor_doc", "trust": 0.95, "retrieved_at": "2026-04-12T00:00:00Z"},
-            {"url": "https://splunkbase.splunk.com/app/4411", "kind": "splunkbase", "trust": 0.90, "retrieved_at": "2026-04-12T00:00:00Z"},
+            {"url": "https://splunkbase.splunk.com/app/5580", "kind": "splunkbase", "trust": 0.90, "retrieved_at": "2026-04-12T00:00:00Z"},
         ],
         "total_samples_found": 3,
         "research_mode": "preset",

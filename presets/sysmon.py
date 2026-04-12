@@ -29,7 +29,7 @@ PRESET = {
     "sourcetype": {
         "name": "WinEventLog:Microsoft-Windows-Sysmon/Operational",
         "confidence": 0.99,
-        "origin": "Splunkbase TA (app 1914) — Splunk Add-on for Sysmon",
+        "origin": "Splunkbase TA (app 5709) — Splunk Add-on for Sysmon",
     },
 
     "fields": [
@@ -125,7 +125,7 @@ PRESET = {
         "sources_consulted": [
             {"url": "https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon", "kind": "vendor_doc", "trust": 0.95, "retrieved_at": "2026-04-12T00:00:00Z"},
             {"url": "https://github.com/SwiftOnSecurity/sysmon-config", "kind": "community", "trust": 0.85, "retrieved_at": "2026-04-12T00:00:00Z"},
-            {"url": "https://splunkbase.splunk.com/app/1914", "kind": "splunkbase", "trust": 0.90, "retrieved_at": "2026-04-12T00:00:00Z"},
+            {"url": "https://splunkbase.splunk.com/app/5709", "kind": "splunkbase", "trust": 0.90, "retrieved_at": "2026-04-12T00:00:00Z"},
         ],
         "total_samples_found": 3,
         "research_mode": "full",

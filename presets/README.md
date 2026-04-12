@@ -11,9 +11,9 @@ When `/fd-discover <source_id>` runs, it checks this directory first. If a prese
 |-----------|------------------|--------|------------|------------|
 | `fortigate` | Fortinet FortiGate | kv | `fgt_traffic` | [2846](https://splunkbase.splunk.com/app/2846) |
 | `cisco_asa` | Cisco ASA Firewall | syslog_bsd | `cisco:asa` | [1620](https://splunkbase.splunk.com/app/1620) |
-| `cisco_ios` | Cisco Catalyst IOS-XE | syslog_bsd | `cisco:ios` | [1621](https://splunkbase.splunk.com/app/1621) |
+| `cisco_ios` | Cisco Catalyst IOS-XE | syslog_bsd | `cisco:ios` | [7538](https://splunkbase.splunk.com/app/7538) |
 | `palo_alto_traffic` | Palo Alto NGFW | csv | `pan:traffic` | [491](https://splunkbase.splunk.com/app/491) |
-| `cisco_meraki_mx` | Cisco Meraki MX | kv | `meraki:securityappliance` | [4411](https://splunkbase.splunk.com/app/4411) |
+| `cisco_meraki_mx` | Cisco Meraki MX | kv | `meraki:securityappliance` | [5580](https://splunkbase.splunk.com/app/5580) |
 | `checkpoint_traffic` | Check Point | kv | `cp_log` | [2842](https://splunkbase.splunk.com/app/2842) |
 
 ### Cloud (5)
@@ -21,7 +21,7 @@ When `/fd-discover <source_id>` runs, it checks this directory first. If a prese
 |-----------|------------------|--------|------------|------------|
 | `aws_cloudtrail` | AWS CloudTrail | json | `aws:cloudtrail` | [1876](https://splunkbase.splunk.com/app/1876) |
 | `aws_guardduty` | AWS GuardDuty | json | `aws:cloudwatch:guardduty` | [1876](https://splunkbase.splunk.com/app/1876) |
-| `entraid_signin` | Microsoft Entra ID | json | `azure:aad:signin` | [3757](https://splunkbase.splunk.com/app/3757) |
+| `entraid_signin` | Microsoft Entra ID | json | `azure:aad:signin` | [3110](https://splunkbase.splunk.com/app/3110) |
 | `gcp_audit` | Google Cloud Platform | json | `google:gcp:pubsub:audit` | [3088](https://splunkbase.splunk.com/app/3088) |
 | `o365_management` | Microsoft 365 | json | `o365:management:activity` | [4055](https://splunkbase.splunk.com/app/4055) |
 
@@ -29,7 +29,7 @@ When `/fd-discover <source_id>` runs, it checks this directory first. If a prese
 | Source ID | Vendor / Product | Format | Sourcetype | Splunkbase |
 |-----------|------------------|--------|------------|------------|
 | `wineventlog_security` | Windows Security Event Log | kv | `WinEventLog:Security` | [742](https://splunkbase.splunk.com/app/742) |
-| `sysmon` | Microsoft Sysmon | kv | `WinEventLog:Microsoft-Windows-Sysmon/Operational` | [1914](https://splunkbase.splunk.com/app/1914) |
+| `sysmon` | Microsoft Sysmon | kv | `WinEventLog:Microsoft-Windows-Sysmon/Operational` | [5709](https://splunkbase.splunk.com/app/5709) |
 | `crowdstrike_falcon` | CrowdStrike Falcon EDR | json | `crowdstrike:falcon` | [4700](https://splunkbase.splunk.com/app/4700) |
 
 ### Linux (1)
@@ -48,7 +48,7 @@ When `/fd-discover <source_id>` runs, it checks this directory first. If a prese
 |-----------|------------------|--------|------------|------------|
 | `servicenow_incident` | ServiceNow ITSM | kv | `snow:incident` | [1928](https://splunkbase.splunk.com/app/1928) |
 | `sap_audit` | SAP S/4HANA | pipe-delimited | `sap:auditlog` | [3153](https://splunkbase.splunk.com/app/3153) |
-| `mssql_errorlog` | Microsoft SQL Server | text | `mssql:errorlog` | [2911](https://splunkbase.splunk.com/app/2911) |
+| `mssql_errorlog` | Microsoft SQL Server | text | `mssql:errorlog` | [2648](https://splunkbase.splunk.com/app/2648) |
 
 ## Usage
 

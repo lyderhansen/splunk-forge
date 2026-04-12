@@ -29,7 +29,7 @@ PRESET = {
     "sourcetype": {
         "name": "cisco:ios",
         "confidence": 0.95,
-        "origin": "Splunkbase TA (app #1621) — Splunk Add-on for Cisco IOS",
+        "origin": "Splunkbase TA (app #7538) — Cisco Catalyst Add-on for Splunk",
     },
 
     "fields": [
@@ -91,7 +91,7 @@ PRESET = {
     "research_metadata": {
         "sources_consulted": [
             {"url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-9/configuration_guide/sys_mgmt/b_179_sys_mgmt_9300_cg/configuring_system_message_logs.html", "kind": "vendor_doc", "trust": 0.95, "retrieved_at": "2026-04-12T00:00:00Z"},
-            {"url": "https://splunkbase.splunk.com/app/1621", "kind": "splunkbase", "trust": 0.90, "retrieved_at": "2026-04-12T00:00:00Z"},
+            {"url": "https://splunkbase.splunk.com/app/7538", "kind": "splunkbase", "trust": 0.90, "retrieved_at": "2026-04-12T00:00:00Z"},
         ],
         "total_samples_found": 3,
         "research_mode": "preset",

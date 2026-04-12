@@ -29,7 +29,7 @@ PRESET = {
     "sourcetype": {
         "name": "mssql:errorlog",
         "confidence": 0.9,
-        "origin": "Splunkbase TA (app 2911) — Microsoft SQL Server DB Connect / Splunk Add-on for Microsoft SQL Server",
+        "origin": "Splunkbase TA (app 2648) — Splunk Add-on for Microsoft SQL Server",
     },
 
     "fields": [
@@ -74,7 +74,7 @@ PRESET = {
         "sources_consulted": [
             {"url": "https://learn.microsoft.com/en-us/sql/tools/configuration-manager/viewing-the-sql-server-error-log", "kind": "vendor_doc", "trust": 0.95, "retrieved_at": "2026-04-12T00:00:00Z"},
             {"url": "https://learn.microsoft.com/en-us/sql/relational-databases/errors-events/mssqlserver-18456-database-engine-error", "kind": "vendor_doc", "trust": 0.95, "retrieved_at": "2026-04-12T00:00:00Z"},
-            {"url": "https://splunkbase.splunk.com/app/2911", "kind": "splunkbase", "trust": 0.9, "retrieved_at": "2026-04-12T00:00:00Z"},
+            {"url": "https://splunkbase.splunk.com/app/2648", "kind": "splunkbase", "trust": 0.9, "retrieved_at": "2026-04-12T00:00:00Z"},
         ],
         "total_samples_found": 3,
         "research_mode": "full",

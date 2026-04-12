@@ -29,7 +29,7 @@ PRESET = {
     "sourcetype": {
         "name": "azure:aad:signin",
         "confidence": 0.97,
-        "origin": "Splunkbase TA (app 3757) — Splunk Add-on for Microsoft Cloud Services",
+        "origin": "Splunkbase TA (app 3110) — Splunk Add-on for Microsoft Cloud Services",
     },
 
     "fields": [
@@ -110,7 +110,7 @@ PRESET = {
         "sources_consulted": [
             {"url": "https://learn.microsoft.com/en-us/entra/identity/monitoring-health/concept-sign-ins", "kind": "vendor_doc", "trust": 0.98, "retrieved_at": "2026-04-12T00:00:00Z"},
             {"url": "https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/signinlogs", "kind": "vendor_doc", "trust": 0.98, "retrieved_at": "2026-04-12T00:00:00Z"},
-            {"url": "https://splunkbase.splunk.com/app/3757", "kind": "splunkbase", "trust": 0.95, "retrieved_at": "2026-04-12T00:00:00Z"},
+            {"url": "https://splunkbase.splunk.com/app/3110", "kind": "splunkbase", "trust": 0.95, "retrieved_at": "2026-04-12T00:00:00Z"},
         ],
         "total_samples_found": 2,
         "research_mode": "full",
