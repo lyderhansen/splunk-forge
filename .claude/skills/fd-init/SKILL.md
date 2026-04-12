@@ -358,18 +358,19 @@ Summary of your new FAKE_DATA workspace:
 
   Infrastructure per location:
     HQ1:
-      [x] FW-HQ1-01    firewall       10.10.0.1     Perimeter firewall
-      [x] SW-HQ1-01    switch         10.10.0.2     Core switch
-      [x] SRV-HQ1-01   server         10.10.0.10    General purpose server
-      [x] PLC-HQ1-01   plc            10.10.0.20    Programmable logic controller  (from purpose)
-      [ ] HMI-HQ1-01   hmi            10.10.0.21    Human-machine interface        (from purpose)
+      FW-HQ1-01    firewall       10.10.0.1     Perimeter firewall
+      SW-HQ1-01    switch         10.10.0.2     Core switch
+      SRV-HQ1-01   server         10.10.0.10    General purpose server
+      PLC-HQ1-01   plc            10.10.0.20    Programmable logic controller  (suggested)
+      HMI-HQ1-01   hmi            10.10.0.21    Human-machine interface        (suggested)
     OFF1:
-      [x] FW-OFF1-01   firewall       10.20.0.1     Perimeter firewall
-      [x] SW-OFF1-01   switch         10.20.0.2     Core switch
-      [x] SRV-OFF1-01  server         10.20.0.10    General purpose server
+      FW-OFF1-01   firewall       10.20.0.1     Perimeter firewall
+      SW-OFF1-01   switch         10.20.0.2     Core switch
+      SRV-OFF1-01  server         10.20.0.10    General purpose server
 
-  Uncheck any infrastructure you don't need. Items marked "(from purpose)"
-  were suggested based on your stated goal.
+  To edit, say what to change. Examples:
+    'remove PLC-HQ1-01, HMI-HQ1-01'
+    'add vpn_gateway to HQ1'
 
 Proceed with creating workspace? [yes/edit/cancel]
 ```
@@ -455,26 +456,39 @@ Then invoke `/fd-add-generator` with the user's answer.
 Print:
 
 ```
-Based on your goal ("<purpose>"), I'd suggest starting with these generators:
-  - <suggestion_1> — <why>
-  - <suggestion_2> — <why>
-  - <suggestion_3> — <why>
+Based on your goal ("<purpose>"), I'd suggest these generators:
+  1. <suggestion_1> — <why>
+  2. <suggestion_2> — <why>
+  3. <suggestion_3> — <why>
+  ...
 
-To create your first generator:
-  /fd-add-generator <source_id>
-  /fd-add-generator <source_id> --sample=<path>   (if you have a log sample)
+Want me to create them now?
+  - **all** — Create all suggested generators (I'll run /fd-discover + /fd-add-generator for each)
+  - **pick** — Choose which ones (e.g. "1, 3, 5")
+  - **skip** — I'll just show the commands, you do it yourself later
+[all]
 ```
 
-**If purpose was not set (quick mode or skipped):** Print generic next steps:
+If the user picks **all** or **pick**: For each selected generator, invoke
+`/fd-discover <source_id>` followed by `/fd-add-generator <source_id>` in
+sequence. Show progress: "Creating generator 1/3: fortigate..."
+
+If the user picks **skip**: Print the manual commands:
+```
+To create generators yourself:
+  /fd-discover <source_id>         (research the log format)
+  /fd-add-generator <source_id>    (scaffold the generator from SPEC.py)
+```
+
+**If purpose was not set (quick mode or skipped):** Print generic next steps with the same choice:
 
 ```
-Next steps:
-  1. Inspect fake_data/world.py  -- your organization's fictional state
-  2. Verify the runtime:  python3 fake_data/main_generate.py --help
-  3. Add your first generator:
-       /fd-add-generator <source_id>
-       /fd-add-generator <source_id> --sample=<path>
+Next steps — add some generators to start producing logs:
 
-Currently 0 sources are registered. Generators live in fake_data/generators/
-and are auto-discovered by main_generate.py at runtime.
+Suggested starting points:
+  1. fortigate — firewall traffic logs (network visibility)
+  2. wineventlog — Windows Security events (auth, account changes)
+  3. linux — Linux syslog and metrics
+
+Want me to create them now? [all/pick/skip]
 ```
