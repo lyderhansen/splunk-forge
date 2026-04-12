@@ -106,77 +106,64 @@ Skip directly to **Phase C** (generate content in memory). The review gate in Ph
 
 ### Phase B.custom — Full interactive wizard
 
-Ask these questions **one at a time**. Wait for each answer before asking the next. Use defaults in brackets if the user just presses enter or says "default".
+This wizard gathers information through **at most 3 prompts**: org name + purpose, optional research, then a single review gate with everything filled in.
 
-#### B.custom.1 Organization name
+#### B.custom.1 Organization name + purpose (single prompt)
 
-> "What is the name of the fictional organization? [Example Corp]"
-
-Store as `ORG_NAME`. Default: `"Example Corp"`.
-
-#### B.custom.2 Real company check
-
-> "Is this based on a real company? If yes, I'll research public information to prefill defaults. [no]"
-
-If yes: run **Phase B.research** below before continuing. If no: continue.
-
-#### B.custom.3 Purpose / goal (NEW)
-
-> "What do you want to use these logs for? Describe briefly — this helps me suggest the right generators and scenarios later.
+> "Two quick questions to get started:
 >
-> Examples:
->   - 'Demonstrate network visibility using firewall and netflow data'
->   - 'SOC training with realistic attack scenarios'
->   - 'Test Splunk dashboards for a retail e-commerce platform'
->   - 'Just generic logs for development and testing'
+>   **Organization name?** [Example Corp]
+>   **What are these logs for?** (e.g. 'SOC training with attack scenarios', 'CISO security visibility', 'test Splunk dashboards') [just generic logs]"
+
+Store `ORG_NAME` and `purpose`. Purpose is saved in manifest.py as `PURPOSE_AT_INIT`.
+
+#### B.custom.2 Research check
+
+> "Is this based on a real company? If yes, I'll research public info to fill in industry, locations, and domain. [no]"
+
+If yes: run **Phase B.research** below. Research fills ALL defaults (industry, locations, domain, employee count). If no: use generic defaults.
+
+#### B.custom.3 Present everything as one review gate
+
+After research (or using defaults), present ALL configuration at once:
+
+> "Here's what I'll create. Edit anything, or say **ok** to proceed:
 >
-> [just generic logs]"
+>   Organization:   <ORG_NAME>
+>   Industry:       <industry>
+>   Purpose:        <purpose>
+>   Domain:         <tenant>
+>   IP range:       10.0.0.0/8
+>
+>   Locations (<N>):
+>     HQ1:  <city>, <country>  (<pct>% of users)
+>     OFF1: <city>, <country>  (<pct>% of users)
+>
+>   Users: <generated_count> will be generated
+>     (Real company has ~<real_count> employees, but we generate
+>      max 100 for efficient log data. Say 'more users <N>' to override.)
+>
+>   Infrastructure per location:
+>     HQ1:  FW-HQ1-01 (firewall), SW-HQ1-01 (switch), SRV-HQ1-01 (server)
+>           + DS-HQ1-01 (directory_server), VPN-HQ1-01 (vpn_gateway)  [from purpose]
+>     OFF1: FW-OFF1-01 (firewall), SW-OFF1-01 (switch), SRV-OFF1-01 (server)
+>
+>   To edit, say what to change. Examples:
+>     'change domain to example.no'
+>     'remove VPN-HQ1-01'
+>     'add wap to OFF1'
+>     'change industry to manufacturing'
+>     'more users 200'
+>
+> [ok]"
 
-Store as `purpose`. Default: `"just generic logs"`. This value is:
-- Saved in `manifest.py` as `PURPOSE_AT_INIT` for future skills to reference
-- Used in Phase F handoff to suggest specific generators and scenarios
-- NOT used to change any technical defaults (world.py, config.py are the same regardless of purpose)
+This replaces B.custom.4 through B.custom.9 — NO separate questions for industry, employee count, locations, domain, or IP range. Everything is presented at once with smart defaults from research.
 
-#### B.custom.4 Industry
+**User count constraint:** Generate at most **100 users** by default, regardless of real employee count. 100 gives enough variety for realistic cross-source correlation (admins, power users, service accounts, multiple departments and locations). If the user explicitly asks for more (e.g. "more users 500"), honor the request up to 500. Beyond 500, warn that world.py will be very large.
 
-> "What industry? Pick one: retail, manufacturing, saas, financial, healthcare, generic [generic]"
+**Infrastructure editing:** The user edits by describing changes in natural language ("remove X", "add Y to Z"). Do NOT show fake checkboxes that can't be toggled.
 
-Store as `INDUSTRY`. Default: `"generic"` (or from research).
-
-#### B.custom.5 Employee count
-
-> "How many employees total? [100]"
-
-Store as `employee_count`. Default: `100` (or from research).
-
-#### B.custom.6 Number of locations
-
-> "How many office locations? [2]"
-
-Store as `location_count`. Default: `2` (or from research).
-
-#### B.custom.7 Location details
-
-For each location (1 through location_count), ask:
-
-> "Location N — name, city, country code (2-letter ISO), timezone, and percentage of employees.
-> Example: Headquarters, Oslo, NO, Europe/Oslo, 60%"
-
-Parse each answer into: `name`, `city`, `country`, `timezone`, `employee_pct`. Generate a location ID from the name (uppercase first 3-4 chars, e.g. "Headquarters" -> "HQ1", "Branch Office" -> "OFF1").
-
-If percentages don't sum to 100%, normalize them proportionally.
-
-#### B.custom.8 Primary domain
-
-> "What is the primary email/web domain? [<orgname_lower>.com]"
-
-Store as `TENANT`. Default: derive from ORG_NAME (lowercase, remove spaces and special chars, append `.com`).
-
-#### B.custom.9 Internal IP plan
-
-> "Which internal IP range? Pick one: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 [10.0.0.0/8]"
-
-Store as `ip_plan`. Default: `"10.0.0.0/8"`.
+The user can say "ok" to accept, or describe any number of changes. Apply changes and re-display if they edit. Only proceed to Phase C when the user approves.
 
 ---
 
@@ -236,7 +223,7 @@ ROLES = [
 
 Always ensure at least 2 admin users and 2 service accounts exist, regardless of employee_count. Distribute remaining users as: ~70% user, ~15% power_user, ~10% admin, ~5% service_account.
 
-**USERS list:** Seed a random generator with `hash(ORG_NAME)` for determinism. For each employee (up to `employee_count`):
+**USERS list:** The number of generated users is `min(employee_count, 100)` by default — capped at 100 for efficient log data, unless the user explicitly requested more in the review gate. Seed a random generator with `hash(ORG_NAME)` for determinism. For each employee (up to the generated count):
 - Pick a first name and last name from the bundled lists. Cycle through them if employee_count > list length.
 - username: `firstname.lastname` (all lowercase). If duplicate, append a digit. Service accounts use format: `svc.<function>` (e.g. `svc.backup`, `svc.monitoring`).
 - email: `username@<TENANT>`
