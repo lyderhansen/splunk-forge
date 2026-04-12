@@ -393,9 +393,17 @@ Read these files using the Read tool (relative to this SKILL.md):
 - `../../../templates/runtime/config.py`
 - `../../../templates/runtime/time_utils.py`
 - `../../../templates/runtime/main_generate.py`
+- `../../../templates/runtime/tui_generate.py`
 - `../../../templates/generators/_template_generator.py`
+- `../../../templates/scenarios/_base.py`
+- `../../../templates/scenarios/__init__.py`
 
 ### E.2 Write all files
+
+First, ensure the `fake_data/scenarios/` directory exists:
+```bash
+mkdir -p fake_data/scenarios
+```
 
 Write each file using the Write tool:
 
@@ -405,11 +413,13 @@ Write each file using the Write tool:
 4. `fake_data/config.py` — exact copy of templates/runtime/config.py
 5. `fake_data/time_utils.py` — exact copy of templates/runtime/time_utils.py
 6. `fake_data/main_generate.py` — exact copy of templates/runtime/main_generate.py
-7. `fake_data/README.md` — generated content from C.5
-8. `fake_data/generators/__init__.py` — empty file
-9. `fake_data/generators/_template_generator.py` — exact copy of templates/generators/_template_generator.py
-10. `fake_data/scenarios/__init__.py` — empty file
-11. `fake_data/output/.gitkeep` — empty file
+7. `fake_data/tui_generate.py` — exact copy of templates/runtime/tui_generate.py
+8. `fake_data/README.md` — generated content from C.5
+9. `fake_data/generators/__init__.py` — empty file
+10. `fake_data/generators/_template_generator.py` — exact copy of templates/generators/_template_generator.py
+11. `fake_data/scenarios/__init__.py` — exact copy of templates/scenarios/__init__.py
+12. `fake_data/scenarios/_base.py` — exact copy of templates/scenarios/_base.py
+13. `fake_data/output/.gitkeep` — empty file
 
 ### E.3 Verify the workspace
 
