@@ -2,6 +2,18 @@
 
 Newest entries first.
 
+## 2026-04-12 ~10:00 UTC — Bundled presets library
+Files: `presets/*.py` (20 files), `presets/README.md`
+
+Added 19 bundled log format presets covering the most common Splunk
+demo sources: Fortinet FortiGate, Cisco ASA/IOS/Meraki, Palo Alto,
+Check Point, AWS CloudTrail/GuardDuty, Azure Entra ID, GCP audit,
+Microsoft 365, Windows Security, Sysmon, CrowdStrike Falcon, Linux
+auth.log, Apache/Nginx, ServiceNow, SAP, MSSQL. Each preset contains
+complete field definitions, realistic sample events, and Splunkbase
+TA references. fd-discover automatically uses these when available,
+skipping research and saving ~60-90 seconds per source.
+
 ## 2026-04-12 ~09:00 UTC — fd-cim: CIM field mapping skill
 Files: `.claude/skills/fd-cim/SKILL.md`, `docs/superpowers/specs/2026-04-12-fd-cim-design.md`
 

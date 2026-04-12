@@ -62,8 +62,9 @@ fake-data/
 ├── data/                        # read by skills at invocation time (not copied)
 │   ├── names_sample.py          # ✅ ~200 first + ~200 last names
 │   └── country_ip_ranges.py     # ✅ 20 countries -> public CIDR ranges
-├── presets/                     # empty — reserved for X2+
-│   └── README.md
+├── presets/                     # ✅ 20 bundled presets (fortigate, cisco_asa, aws_cloudtrail, etc.)
+│   ├── README.md
+│   └── <source_id>.py           # each preset is a PRESET dict
 ├── docs/
 │   └── superpowers/
 │       ├── specs/
