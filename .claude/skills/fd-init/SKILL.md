@@ -268,6 +268,40 @@ ROLES = ["user", "power_user", "admin", "service_account"]
 
 **EXTERNAL_IP_POOL_BY_COUNTRY:** Dict mapping each country code to its ranges from `COUNTRY_RANGES`.
 
+**INFRASTRUCTURE:** Generate infrastructure devices per location. Two tiers:
+
+**Minimum per location (always generated):**
+
+| Role | Hostname pattern | IP offset | Description |
+|---|---|---|---|
+| `firewall` | `FW-<LOC>-01` | `.0.1` (same as gateway) | Perimeter firewall |
+| `switch` | `SW-<LOC>-01` | `.0.2` | Core switch |
+| `server` | `SRV-<LOC>-01` | `.0.10` | General purpose server |
+
+**Purpose-driven additions (suggested, user can remove in review gate):**
+
+Analyze the `purpose` text (from B.custom.3 or empty for quick/just-data modes). If purpose contains keywords, suggest additional roles:
+
+| Purpose keywords | Extra roles suggested |
+|---|---|
+| network, firewall, visibility, netflow | `router` (RTR, .0.3) |
+| windows, AD, endpoint, identity | `directory_server` (DS, .0.11), `file_server` (FS, .0.12) |
+| web, retail, e-commerce, application | `web_server` (WEB, .0.80), `database` (DB, .0.90), `load_balancer` (LB, .0.5) |
+| cloud, hybrid, proxy | `proxy` (PRX, .0.8), `vpn_gateway` (VPN, .0.9) |
+| email, collaboration, messaging | `mail_server` (MAIL, .0.25) |
+| OT, manufacturing, SCADA, industrial | `plc` (PLC, .0.20), `hmi` (HMI, .0.21) |
+| SOC, security, SIEM, detection | `log_collector` (LOG, .0.14) |
+| no match / generic | no extras — just minimum |
+
+These are **suggestions only**. The review gate (Phase D) shows them with checkboxes so the user can remove any they do not need. For quick mode and just-data mode (no purpose set), only generate the minimum set.
+
+Each infrastructure entry is a dict:
+```python
+{"hostname": "FW-HQ1-01", "ip": "10.10.0.1", "location": "HQ1", "role": "firewall", "description": "Perimeter firewall"}
+```
+
+Infrastructure roles are technology-agnostic — `firewall` could be FortiGate, Palo Alto, or ASA. The technology choice is made later by `fd-add-generator`, not by init.
+
 ### C.3 Compose world.py content
 
 Generate the full `world.py` file content as a Python module with:
@@ -279,15 +313,19 @@ Generate the full `world.py` file content as a Python module with:
 - `NETWORK_CONFIG` dict (keyed by location ID)
 - `EXTERNAL_IP_POOL` list
 - `EXTERNAL_IP_POOL_BY_COUNTRY` dict
+- `INFRASTRUCTURE` list (all generated infra devices)
 - `USERS` list (all generated users, each with full field set: username, full_name, email, location, department, role, title, user_id, workstation, workstation_ip, mac_address, phone, manager)
 - Helper functions:
   - `get_user_by_username(username: str) -> Optional[Dict]`
   - `users_at_location(location_id: str) -> List[Dict]`
-  - `users_by_role(role: str) -> List[Dict]` — filter USERS by role (e.g. `users_by_role("admin")`)
+  - `users_by_role(role: str) -> List[Dict]` — filter USERS by role
   - `get_user_by_ip(ip: str) -> Optional[Dict]` — find user by workstation_ip
   - `get_user_by_workstation(hostname: str) -> Optional[Dict]` — find user by workstation name
   - `admins() -> List[Dict]` — shortcut for `users_by_role("admin")`
   - `service_accounts() -> List[Dict]` — shortcut for `users_by_role("service_account")`
+  - `infra_at_location(location_id: str) -> List[Dict]` — infrastructure at a location
+  - `infra_by_role(role: str) -> List[Dict]` — infrastructure by role (e.g. `infra_by_role("firewall")`)
+  - `get_infra_by_hostname(hostname: str) -> Optional[Dict]` — find infra device by hostname
 
 ### C.4 Compose manifest.py content
 
@@ -316,30 +354,43 @@ A brief markdown file explaining:
 
 ## Phase D — Review gate
 
-Display a summary:
+Display a summary. For custom mode with purpose, include the infrastructure section with checkboxes:
 
 ```
 Summary of your new FAKE_DATA workspace:
 
   Organization:   <ORG_NAME>
   Industry:       <INDUSTRY>
+  Purpose:        <purpose or "generic">
   Locations:      <N>  (<loc1_id>: <city> <country> [<N> users], ...)
-  Users:          <employee_count> generated (deterministic from org name)
+  Users:          <employee_count> generated
+    - <N> standard users, <N> power users, <N> admins, <N> service accounts
   Domain:         <TENANT>
   Internal IPs:   <ip_plan>  (<loc1_id>: <subnet>, ...)
   External IPs:   <country list> ranges + RFC 5737 fallback
 
-  Files to be written under ./fake_data/:
-    manifest.py, world.py, config.py, time_utils.py, main_generate.py,
-    README.md, generators/_template_generator.py,
-    generators/__init__.py, scenarios/__init__.py, __init__.py,
-    output/.gitkeep
+  Infrastructure per location:
+    HQ1:
+      [x] FW-HQ1-01    firewall       10.10.0.1     Perimeter firewall
+      [x] SW-HQ1-01    switch         10.10.0.2     Core switch
+      [x] SRV-HQ1-01   server         10.10.0.10    General purpose server
+      [x] PLC-HQ1-01   plc            10.10.0.20    Programmable logic controller  (from purpose)
+      [ ] HMI-HQ1-01   hmi            10.10.0.21    Human-machine interface        (from purpose)
+    OFF1:
+      [x] FW-OFF1-01   firewall       10.20.0.1     Perimeter firewall
+      [x] SW-OFF1-01   switch         10.20.0.2     Core switch
+      [x] SRV-OFF1-01  server         10.20.0.10    General purpose server
+
+  Uncheck any infrastructure you don't need. Items marked "(from purpose)"
+  were suggested based on your stated goal.
 
 Proceed with creating workspace? [yes/edit/cancel]
 ```
 
-- **yes**: proceed to Phase E
-- **edit**: go back to Phase B, let user change specific answers, then re-run Phase C and D
+The user can tell you to remove specific infrastructure items (e.g. "remove HMI"). Update the INFRASTRUCTURE list accordingly before proceeding.
+
+- **yes**: proceed to Phase E with current infrastructure selection
+- **edit**: go back to Phase B to change org details, or just remove/add specific infrastructure items
 - **cancel**: exit without writing anything
 
 ---
