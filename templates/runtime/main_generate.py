@@ -217,6 +217,8 @@ Examples:
                         help="(Reserved for Splunk integration)")
     parser.add_argument("--no-test", action="store_true",
                         help="(Reserved for Splunk integration)")
+    parser.add_argument("--tui", action="store_true",
+                        help="Launch interactive TUI")
 
     args = parser.parse_args()
 
@@ -227,6 +229,11 @@ Examples:
         print("In the current version, all output goes to fake_data/output/.",
               file=sys.stderr)
         sys.exit(2)
+
+    if args.tui:
+        from fake_data.tui_generate import main as tui_main
+        tui_main()
+        return
 
     # Verify workspace
     try:
