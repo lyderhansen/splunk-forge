@@ -114,6 +114,24 @@ For each field extracted in A.4, attempt to match against this pattern table
 | dest_mac, dst_mac             | dest_mac      |                                |
 | vendor, vendor_name           | vendor        |                                |
 | product, product_name         | product       |                                |
+| dvc, device, device_name      | dvc           |                                |
+| file_name, filename           | file_name     |                                |
+| file_path, filepath           | file_path     |                                |
+| file_hash, hash, sha256, md5  | file_hash     |                                |
+| file_size, size               | file_size     |                                |
+| dest_port, dport              | dest_port     |                                |
+| src_zone, zone                | src_zone      |                                |
+| dest_zone, dst_zone           | dest_zone     |                                |
+| direction, dir                | direction     |                                |
+| icmp_type                     | icmp_type     |                                |
+| icmp_code                     | icmp_code     |                                |
+| cve, vuln_id                  | cve           |                                |
+| cvss, risk_score              | cvss          |                                |
+| answer, dns_answer            | answer        | DNS model                      |
+| query, dns_query              | query         | DNS model                      |
+| subject, email_subject        | subject       | Email model                    |
+| recipient, to                 | recipient     | Email model                    |
+| sender, from_address          | src_user      | Email model                    |
 
 Build two lists:
 - `mapped`: `[{"field": "srcip", "cim_field": "src", "method": "fieldalias"}, ...]`
@@ -126,19 +144,27 @@ Use SOURCE_META["category"] to select the primary CIM model:
 | Category            | Primary model         | Additional models          |
 |---------------------|-----------------------|----------------------------|
 | network             | Network_Traffic       |                            |
-| firewall            | Network_Traffic       |                            |
+| firewall            | Network_Traffic       | Intrusion_Detection        |
 | cloud               | Authentication        | Change                     |
 | windows             | Endpoint              | Authentication             |
 | linux               | Performance           | Authentication             |
 | web                 | Web                   |                            |
 | auth                | Authentication        |                            |
-| endpoint            | Endpoint              |                            |
+| endpoint            | Endpoint              | Malware                    |
 | dns                 | Network_Resolution    |                            |
 | email               | Email                 |                            |
 | ids / ips           | Intrusion_Detection   | Network_Traffic            |
 | proxy               | Web                   | Network_Traffic            |
-| vpn                 | Authentication        | Network_Traffic            |
+| vpn                 | Authentication        | Network_Sessions           |
 | database            | Databases             |                            |
+| dlp                 | Data_Loss_Prevention  |                            |
+| vulnerability       | Vulnerabilities       |                            |
+| ot                  | Network_Traffic       | Intrusion_Detection        |
+| itsm                | Ticket_Management     | Change                     |
+| certificate         | Certificates          |                            |
+| alerts              | Alerts                |                            |
+
+**CIM field reference:** https://help.splunk.com/en/splunk-enterprise-security-8/common-information-model/5.1/data-models/cim-fields-per-associated-data-model
 
 If category does not match, default to `Network_Traffic` and note it as
 uncertain for the research subagent in Phase C.
