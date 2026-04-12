@@ -1,12 +1,12 @@
 ---
-name: add-generator
+name: fd-add-generator
 description: Scaffold a new log generator from a sample file or interactive wizard. Creates a Python generator in fake_data/generators/.
 version: 0.1.0
 metadata:
   argument-hint: "<source_id> [--sample=<path>] [--category=<cat>] [--format=<fmt>]"
 ---
 
-# add-generator — Scaffold a new log generator
+# fd-add-generator — Scaffold a new log generator
 
 Create a new Python log generator in an existing FAKE_DATA workspace. Supports two modes:
 - **Sample mode** (`--sample=<path>`): detect format and fields from a log file
@@ -30,16 +30,16 @@ Check: ../../fake_data/manifest.py
 ```
 
 If not found, stop:
-> "No FAKE_DATA workspace found. Run `/fake-data:init` first."
+> "No FAKE_DATA workspace found. Run `/fd-init` first."
 
 If found, set the workspace root to the directory containing `fake_data/`.
 
 ### A.2 Parse arguments
 
-Expected invocation: `/fake-data:add-generator <source_id> [--sample=<path>] [--category=<cat>] [--format=<fmt>]`
+Expected invocation: `/fd-add-generator <source_id> [--sample=<path>] [--category=<cat>] [--format=<fmt>]`
 
 `source_id` is required. If missing:
-> "Missing source_id. Usage: `/fake-data:add-generator <source_id> [--sample=<path>]`"
+> "Missing source_id. Usage: `/fd-add-generator <source_id> [--sample=<path>]`"
 
 ### A.3 Normalize source_id
 

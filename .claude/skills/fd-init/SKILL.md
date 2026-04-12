@@ -1,12 +1,12 @@
 ---
-name: init
+name: fd-init
 description: Create a new FAKE_DATA workspace with a fictional organization. Generates world.py, config, runtime templates, and directory structure.
 version: 0.1.0
 metadata:
   argument-hint: "(no arguments — interactive wizard)"
 ---
 
-# init — Create a FAKE_DATA workspace
+# fd-init — Create a FAKE_DATA workspace
 
 Create a new FAKE_DATA workspace in the current directory. This skill generates a `fake_data/` directory with all runtime files needed to create and run log generators.
 
@@ -193,7 +193,7 @@ ORG_NAME_AT_INIT = "<ORG_NAME>"
 A brief markdown file explaining:
 - What init created
 - How to verify (`python3 fake_data/main_generate.py --help`)
-- How to add a generator (`/fake-data:add-generator <source_id>`)
+- How to add a generator (`/fd-add-generator <source_id>`)
 - Where world.py lives for manual editing
 - That generators will be auto-discovered by main_generate.py
 
@@ -278,7 +278,7 @@ FAKE_DATA workspace created at ./fake_data/
 Next steps:
   1. Inspect fake_data/world.py  -- your organization's fictional state
   2. Verify the runtime:  python3 fake_data/main_generate.py --help
-  3. Add your first generator:  /fake-data:add-generator <source_id>
+  3. Add your first generator:  /fd-add-generator <source_id>
      Use --sample=<path> if you have a log file, or answer wizard questions.
 
 Currently 0 sources are registered. Generators live in fake_data/generators/

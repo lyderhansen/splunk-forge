@@ -32,13 +32,13 @@ fake-data/
 │   └── plugin.json              # plugin manifest
 ├── .claude/
 │   └── skills/
-│       ├── init/                # ✅ X1 — workspace creation wizard
+│       ├── fd-init/             # ✅ X1 — workspace creation wizard
 │       │   └── SKILL.md
-│       ├── add-generator/       # ✅ X1 — generator scaffolding (sample + wizard)
+│       ├── fd-add-generator/    # ✅ X1 — generator scaffolding (sample + wizard)
 │       │   └── SKILL.md
-│       ├── discover-logformat/  # future (X2)
-│       ├── add-scenario/        # future (X5)
-│       └── generate-logs/       # future (X5)
+│       ├── fd-discover/         # future (X2)
+│       ├── fd-add-scenario/     # future (X5)
+│       └── fd-generate/         # future (X5)
 ├── templates/
 │   ├── runtime/                 # Python files copied into user repo by init
 │   │   ├── config.py            # ✅ defaults, volume params, output paths
