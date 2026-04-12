@@ -25,8 +25,23 @@ Run via Bash:
 test -f fake_data/manifest.py && echo "EXISTS" || echo "CLEAN"
 ```
 
-If `EXISTS`: stop immediately and print:
-> "A FAKE_DATA workspace already exists at `./fake_data/`. Delete it or run init from a different directory."
+If `EXISTS`: ask the user:
+
+> "A FAKE_DATA workspace already exists at `./fake_data/` (created <read INITIALIZED_AT from manifest.py>).
+>
+>   1. **Start fresh** — delete the existing workspace and create a new one
+>   2. **Cancel** — keep the existing workspace
+>
+> Pick 1 or 2: [2]"
+
+If **Start fresh (1):** Delete the entire `fake_data/` directory via Bash:
+```bash
+rm -rf fake_data/
+```
+Then proceed to Phase B.
+
+If **Cancel (2):** Stop. Print:
+> "Keeping existing workspace. Run `/fd-add-generator` to add generators to it."
 
 ### A.2 Check for stale fake_data/ directory
 
@@ -35,10 +50,19 @@ If manifest.py does not exist, also check:
 test -d fake_data && echo "DIR_EXISTS" || echo "NO_DIR"
 ```
 
-If `DIR_EXISTS`: stop and print:
-> "A `fake_data/` directory exists here but has no manifest.py. This looks like a partially-initialized or unrelated directory. Please remove or rename it before running init."
+If `DIR_EXISTS`: ask the user:
 
-### A.3 If clean, proceed to Phase B.
+> "A `fake_data/` directory exists here but has no manifest.py. This could be a partially-initialized or unrelated directory.
+>
+>   1. **Delete and start fresh** — remove it and create a new workspace
+>   2. **Cancel** — leave it alone
+>
+> Pick 1 or 2: [2]"
+
+If **Delete (1):** `rm -rf fake_data/` and proceed to Phase B.
+If **Cancel (2):** Stop.
+
+### A.3 If clean (no fake_data/ directory exists), proceed to Phase B.
 
 ---
 
