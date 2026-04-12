@@ -56,6 +56,27 @@ Check if `fake_data/generators/generate_<source_id>.py` already exists.
 If it does:
 > "Generator for '<source_id>' already exists at `fake_data/generators/generate_<source_id>.py`. Delete it first or pick a different source_id."
 
+### A.4b Check for existing SPEC.py
+
+Check if `fake_data/discover/<source_id>/SPEC.py` exists.
+
+If it exists:
+- Read it using the Read tool
+- Extract the SPEC dict: source, format, fields, sample_events, generator_hints, category
+- Print: "Found discovery spec at `fake_data/discover/<source_id>/SPEC.py` (confidence: <overall_confidence>). Using it to scaffold the generator."
+- **Skip Phase B entirely** — no sample parsing, no wizard questions
+- Build Findings directly from SPEC:
+  - `format` = SPEC["format"]["type"]
+  - `category` = SPEC["category"]
+  - `volume_category` = SPEC["generator_hints"]["volume_category"]
+  - `fields` = SPEC["fields"]
+  - `sample_events` = SPEC["sample_events"]
+  - `description` = SPEC["source"]["description"]
+  - `multi_file` = SPEC["generator_hints"]["multi_file"]
+- Proceed directly to **Phase C** (review gate)
+
+If it does not exist: continue to A.5.
+
 ### A.5 Decide mode
 
 If `--sample=<path>` is provided: **sample mode** (Phase B.sample).
