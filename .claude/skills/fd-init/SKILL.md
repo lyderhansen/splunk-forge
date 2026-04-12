@@ -120,7 +120,8 @@ everything" mode.
    scenario is active), `--sources=<source_id>`, `--scenarios=<scenario or none>`.
    Stream output to user.
 
-7. **STOP before fd-build-app.** Print a final summary:
+7. **Print summary and prompt to build the app.** After fd-generate
+   completes, show the summary and ask one question:
 
    ```
    🚀 YOLO pipeline complete!
@@ -131,15 +132,35 @@ everything" mode.
    Scenario:   fake_data/scenarios/<scenario>.py  (if --scenario was set)
    Output:     fake_data/output/<category>/<source_id>.log
                <N> events over <days> days
-
-   Everything is ready to package. Review the output, then run:
-     /fd-build-app
-
-   This is the only manual step. YOLO mode does not auto-package because
-   packaging is a deliberate decision (app name, CIM level, tar.gz artifact).
    ```
 
-8. **Do NOT invoke `/fd-build-app` automatically.** Stop.
+   Then ask:
+
+   > "Build the Splunk TA now?
+   >
+   >   1. **yes** — Run /fd-build-app with full CIM alignment and auto app name
+   >   2. **skip** — I'll review the output and build it myself later
+   > [1]"
+
+8. **Handle the answer:**
+
+   - **yes**: invoke `/fd-build-app` — it will use the CIM mappings created
+     in step 4, default to full CIM level, and name the app `TA-<ORG_NAME_UPPER>`.
+     Pass these as answers to fd-build-app's Phase B questions so it doesn't
+     prompt again. After fd-build-app completes, print the final path to
+     the `.tar.gz` package.
+
+   - **skip**: stop here and print:
+     ```
+     Run /fd-build-app when you're ready. It will detect the CIM mappings
+     and generators automatically.
+     ```
+
+**YOLO mode does NOT auto-confirm the build step** — the user still gets
+one explicit "yes" before the Splunk TA is generated, because packaging
+has consequences (app name, files written to splunk_app/, tar.gz created).
+But it does offer the next step inline instead of requiring a separate
+skill invocation.
 
 **IMPORTANT:** In YOLO mode, every skill invocation passes `--auto` or
 equivalent flags so no interactive prompts surface. If any skill genuinely
