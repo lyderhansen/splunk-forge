@@ -3,14 +3,24 @@ name: fd-init
 description: Create a new FAKE_DATA workspace with a fictional organization. Generates world.py, config, runtime templates, and directory structure.
 version: 0.1.0
 metadata:
-  argument-hint: "(no arguments — interactive wizard)"
+  argument-hint: "[<log-file>] [--description=...] [--scenario=...] [--yolo]"
 ---
 
 # fd-init — Create a FAKE_DATA workspace
 
 Create a new FAKE_DATA workspace in the current directory. This skill generates a `fake_data/` directory with all runtime files needed to create and run log generators.
 
-**No arguments.** All configuration is gathered interactively.
+**Two modes:**
+
+1. **Interactive (default)** — `/fd-init` with no arguments. Wizard-based setup with defaults.
+2. **Full pipeline (`--yolo`)** — `/fd-init <log-file> [--description="..."] [--scenario="..."] --yolo`. Runs the entire pipeline from init all the way through log generation, stopping just before Splunk TA packaging. The only required argument is the log file path. Everything else is auto-filled.
+
+**Examples:**
+```
+/fd-init
+/fd-init firewall.log --yolo
+/fd-init firewall.log --description="SOC demo for energy company" --scenario=brute_force --yolo
+```
 
 ---
 
@@ -68,9 +78,79 @@ If **Cancel (2):** Stop.
 
 ## Phase B — Setup mode selection
 
-The first question determines the entire flow. Ask this before anything else.
+### B.yolo — Full pipeline mode (if --yolo flag provided)
 
-### B.0 Mode selection
+If the invocation included `--yolo`, skip ALL questions in this phase and
+execute the full pipeline automatically. This is the "I trust you, just do
+everything" mode.
+
+**Required argument:** A log file path (first positional argument).
+**Optional arguments:**
+- `--description="..."` — Sets the workspace purpose. If it describes a real
+  company, fd-init will research it for locations and industry.
+- `--scenario=<type>` — Creates a scenario after the generator is in place.
+  Type can be a keyword like `brute_force`, `data_exfil`, `disk_filling`,
+  or a free-text description.
+
+**YOLO pipeline execution:**
+
+1. **fd-init workspace** — Use Phase B.quick defaults silently. If
+   `--description` hints at a real company (e.g. "NTE energy company"),
+   run Phase B.1-research to get industry/locations. Otherwise use
+   "Example Corp" defaults. SKIP the review gate. Go directly to Phase E
+   (write files).
+
+2. **fd-discover <log-file>** — After Phase F writes the workspace, invoke
+   `/fd-discover` with the log file as `--sample=<path>`. If the file
+   matches a bundled preset (check presets/ by filename heuristic), use
+   the preset. Auto-accept all confidence gates.
+
+3. **fd-add-generator <source_id>** — Invoke after fd-discover completes.
+   It will auto-detect the SPEC.py. Auto-accept the review gate.
+
+4. **fd-cim <source_id>** — Invoke after generator is scaffolded. Use
+   rule-based mapping only (skip research subagent for unmapped fields).
+   Auto-accept the review gate.
+
+5. **fd-add-scenario <scenario>** — Only if `--scenario` was provided.
+   Use `--auto` internally to skip source-matching prompts. Auto-accept
+   the review gate.
+
+6. **fd-generate** — Auto-run with `--days=7` (or `end_day + 2` if a
+   scenario is active), `--sources=<source_id>`, `--scenarios=<scenario or none>`.
+   Stream output to user.
+
+7. **STOP before fd-build-app.** Print a final summary:
+
+   ```
+   🚀 YOLO pipeline complete!
+
+   Workspace:  ./fake_data/ (<ORG_NAME>)
+   Generator:  fake_data/generators/generate_<source_id>.py
+   CIM:        fake_data/cim/<source_id>.py
+   Scenario:   fake_data/scenarios/<scenario>.py  (if --scenario was set)
+   Output:     fake_data/output/<category>/<source_id>.log
+               <N> events over <days> days
+
+   Everything is ready to package. Review the output, then run:
+     /fd-build-app
+
+   This is the only manual step. YOLO mode does not auto-package because
+   packaging is a deliberate decision (app name, CIM level, tar.gz artifact).
+   ```
+
+8. **Do NOT invoke `/fd-build-app` automatically.** Stop.
+
+**IMPORTANT:** In YOLO mode, every skill invocation passes `--auto` or
+equivalent flags so no interactive prompts surface. If any skill genuinely
+can't proceed without user input (e.g. fd-discover can't detect format and
+has no preset), surface the error clearly and stop — do not guess.
+
+---
+
+### B.0 Mode selection (interactive, no --yolo)
+
+If `--yolo` was NOT provided, ask this question:
 
 > "How would you like to set up your FAKE_DATA workspace?
 >
