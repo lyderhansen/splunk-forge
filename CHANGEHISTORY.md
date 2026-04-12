@@ -2,6 +2,18 @@
 
 Newest entries first.
 
+## 2026-04-12 ~05:00 UTC — fd-add-scenario: scenario system
+Files: `.claude/skills/fd-add-scenario/SKILL.md`, `templates/scenarios/_base.py`,
+       `templates/scenarios/__init__.py`, `templates/runtime/config.py`,
+       `templates/generators/_template_generator.py`
+
+Adds the scenario system to FAKE_DATA. BaseScenario with auto-resolver handles
+both enriched and basic world.py. discover_scenarios() replaces the expand_scenarios
+placeholder. Template generator updated with active scenario injection hook.
+fd-add-scenario skill provides research-based scenario creation (subagent) with
+phases A-G: pre-flight, research, source matching, review gate, code generation
+with runtime bootstrap, verification, and handoff.
+
 ## 2026-04-12 ~03:00 UTC — fd-discover: log format discovery skill
 Files: `.claude/skills/fd-discover/SKILL.md`, `.claude/skills/fd-discover/canary/`,
        `.claude/skills/fd-add-generator/SKILL.md` (updated for SPEC.py auto-detection)

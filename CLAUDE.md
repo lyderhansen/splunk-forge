@@ -38,15 +38,19 @@ fake-data/
 │       │   └── SKILL.md
 │       ├── fd-discover/         # ✅ X2 — log format discovery with research
 │       │   └── SKILL.md
-│       ├── fd-add-scenario/     # future (X5)
+│       ├── fd-add-scenario/     # ✅ X3 — scenario creation with research
+│       │   └── SKILL.md
 │       └── fd-generate/         # future (X5)
 ├── templates/
 │   ├── runtime/                 # Python files copied into user repo by init
 │   │   ├── config.py            # ✅ defaults, volume params, output paths
 │   │   ├── time_utils.py        # ✅ timestamp formatters, calc_natural_events
 │   │   └── main_generate.py     # ✅ orchestrator with filesystem discovery
-│   └── generators/
-│       └── _template_generator.py  # ✅ generator skeleton with SOURCE_META
+│   ├── generators/
+│   │   └── _template_generator.py  # ✅ generator skeleton with SOURCE_META
+│   └── scenarios/
+│       ├── __init__.py          # ✅ empty package marker
+│       └── _base.py             # ✅ BaseScenario class + auto-resolver
 ├── data/                        # read by skills at invocation time (not copied)
 │   ├── names_sample.py          # ✅ ~200 first + ~200 last names
 │   └── country_ip_ranges.py     # ✅ 20 countries -> public CIDR ranges
