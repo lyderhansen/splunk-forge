@@ -30,7 +30,7 @@ PRESET = {
     "sourcetype": {
         "name": "cp_log",
         "confidence": 0.95,
-        "origin": "Splunkbase TA (app #2842) — Check Point App for Splunk / Log Exporter",
+        "origin": "Splunkbase TA (app #4293) — Check Point App for Splunk",
     },
 
     "fields": [
@@ -111,7 +111,7 @@ PRESET = {
     "research_metadata": {
         "sources_consulted": [
             {"url": "https://sc1.checkpoint.com/documents/SKP/CP_R81_LoggingAndMonitoring_AdminGuide/Topics-LMG/Log-Exporter.htm", "kind": "vendor_doc", "trust": 0.95, "retrieved_at": "2026-04-12T00:00:00Z"},
-            {"url": "https://splunkbase.splunk.com/app/2842", "kind": "splunkbase", "trust": 0.90, "retrieved_at": "2026-04-12T00:00:00Z"},
+            {"url": "https://splunkbase.splunk.com/app/4293", "kind": "splunkbase", "trust": 0.90, "retrieved_at": "2026-04-12T00:00:00Z"},
         ],
         "total_samples_found": 3,
         "research_mode": "preset",

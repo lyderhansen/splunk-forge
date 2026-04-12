@@ -4,7 +4,7 @@ Pre-built log format specifications bundled with FAKE_DATA. Each preset is a Pyt
 
 When `/fd-discover <source_id>` runs, it checks this directory first. If a preset exists, research is skipped — the preset is copied directly as the spec, saving time and API calls.
 
-## Available presets (20)
+## Available presets (21)
 
 ### Network / Firewall (6)
 | Source ID | Vendor / Product | Format | Sourcetype | Splunkbase |
@@ -14,7 +14,7 @@ When `/fd-discover <source_id>` runs, it checks this directory first. If a prese
 | `cisco_ios` | Cisco Catalyst IOS-XE | syslog_bsd | `cisco:ios` | [7538](https://splunkbase.splunk.com/app/7538) |
 | `palo_alto_traffic` | Palo Alto NGFW | csv | `pan:traffic` | [491](https://splunkbase.splunk.com/app/491) |
 | `cisco_meraki_mx` | Cisco Meraki MX | kv | `meraki:securityappliance` | [5580](https://splunkbase.splunk.com/app/5580) |
-| `checkpoint_traffic` | Check Point | kv | `cp_log` | [2842](https://splunkbase.splunk.com/app/2842) |
+| `checkpoint_traffic` | Check Point | kv | `cp_log` | [4293](https://splunkbase.splunk.com/app/4293) |
 
 ### Cloud (5)
 | Source ID | Vendor / Product | Format | Sourcetype | Splunkbase |
@@ -30,7 +30,7 @@ When `/fd-discover <source_id>` runs, it checks this directory first. If a prese
 |-----------|------------------|--------|------------|------------|
 | `wineventlog_security` | Windows Security Event Log | kv | `WinEventLog:Security` | [742](https://splunkbase.splunk.com/app/742) |
 | `sysmon` | Microsoft Sysmon | kv | `WinEventLog:Microsoft-Windows-Sysmon/Operational` | [5709](https://splunkbase.splunk.com/app/5709) |
-| `crowdstrike_falcon` | CrowdStrike Falcon EDR | json | `crowdstrike:falcon` | [4700](https://splunkbase.splunk.com/app/4700) |
+| `crowdstrike_falcon` | CrowdStrike Falcon EDR | json | `crowdstrike:falcon` | [5082](https://splunkbase.splunk.com/app/5082) |
 
 ### Linux (1)
 | Source ID | Vendor / Product | Format | Sourcetype | Splunkbase |
@@ -42,6 +42,11 @@ When `/fd-discover <source_id>` runs, it checks this directory first. If a prese
 |-----------|------------------|--------|------------|------------|
 | `apache_access` | Apache HTTP Server | combined | `access_combined` | native |
 | `nginx_access` | Nginx | combined | `nginx:plus:access` | [3258](https://splunkbase.splunk.com/app/3258) |
+
+### Collaboration (1)
+| Source ID | Vendor / Product | Format | Sourcetype | Splunkbase |
+|-----------|------------------|--------|------------|------------|
+| `cisco_webex` | Cisco Webex | json | `cisco:webex:meetings` | GitHub ([cisco-webex-add-on-for-splunk](https://github.com/splunk/cisco-webex-add-on-for-splunk)) — no official Splunkbase app |
 
 ### ITSM / ERP / DB (3)
 | Source ID | Vendor / Product | Format | Sourcetype | Splunkbase |

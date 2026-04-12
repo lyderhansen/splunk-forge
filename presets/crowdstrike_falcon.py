@@ -29,7 +29,7 @@ PRESET = {
     "sourcetype": {
         "name": "crowdstrike:falcon",
         "confidence": 0.95,
-        "origin": "Splunkbase TA (app 4700) — CrowdStrike Falcon Event Streams",
+        "origin": "Splunkbase TA (app 5082) — CrowdStrike Falcon Event Streams Technical Add-On",
     },
 
     "fields": [
@@ -113,7 +113,7 @@ PRESET = {
         "sources_consulted": [
             {"url": "https://www.crowdstrike.com/blog/tech-center/streaming-api/", "kind": "vendor_doc", "trust": 0.90, "retrieved_at": "2026-04-12T00:00:00Z"},
             {"url": "https://falcon.crowdstrike.com/documentation/page/streaming", "kind": "vendor_doc", "trust": 0.95, "retrieved_at": "2026-04-12T00:00:00Z"},
-            {"url": "https://splunkbase.splunk.com/app/4700", "kind": "splunkbase", "trust": 0.90, "retrieved_at": "2026-04-12T00:00:00Z"},
+            {"url": "https://splunkbase.splunk.com/app/5082", "kind": "splunkbase", "trust": 0.90, "retrieved_at": "2026-04-12T00:00:00Z"},
         ],
         "total_samples_found": 3,
         "research_mode": "full",
