@@ -2,6 +2,16 @@
 
 Newest entries first.
 
+## 2026-04-12 ~08:00 UTC — fd-build-app: Splunk TA generation
+Files: `.claude/skills/fd-build-app/SKILL.md`
+
+Generates a complete Splunk Technology Add-on from workspace state.
+Produces app.conf, inputs.conf, props.conf (with MAX_DAYS_HENCE/AGO
+wildcard for synthetic data), transforms.conf (demo_id indexed extraction),
+fields.conf, and optional full CIM alignment with FIELDALIAS, EVAL, LOOKUP,
+eventtypes, tags, and lookup CSVs from world.py. Packages as tar.gz with
+Mac artifact cleanup.
+
 ## 2026-04-12 ~07:00 UTC — fd-generate + TUI: generation interfaces
 Files: `.claude/skills/fd-generate/SKILL.md`, `templates/runtime/tui_generate.py`,
        `templates/runtime/main_generate.py` (--tui flag)

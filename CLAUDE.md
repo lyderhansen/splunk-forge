@@ -44,7 +44,8 @@ fake-data/
 │       │   └── SKILL.md
 │       ├── fd-generate/         # ✅ X5 — guided generation wizard
 │       │   └── SKILL.md
-│       └── fd-build-app/        # future (X6)
+│       └── fd-build-app/        # ✅ X6 — Splunk TA generation
+│           └── SKILL.md
 ├── templates/
 │   ├── runtime/                 # Python files copied into user repo by init
 │   │   ├── config.py            # ✅ defaults, volume params, output paths
