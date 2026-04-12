@@ -153,23 +153,82 @@ HOUR_ACTIVITY_WEEKEND_FIREWALL = {
 
 
 # =============================================================================
-# SCENARIO SUPPORT (placeholder for add-scenario skill)
+# SCENARIO SUPPORT
 # =============================================================================
 
-def expand_scenarios(scenarios: str) -> List:
-    """Expand a scenario specification string into active scenario instances.
+def discover_scenarios() -> dict:
+    """Scan fake_data/scenarios/ for modules with SCENARIO_META.
 
-    In X1 this is a no-op placeholder. The add-scenario skill (future plan)
-    will replace this with real implementation that loads scenario classes
-    from fake_data/scenarios/ and returns active instances.
+    Returns dict mapping scenario_id -> {"meta": dict, "instance": BaseScenario}.
+    """
+    import importlib
+    import pkgutil
+
+    scenarios_dir = Path(__file__).resolve().parent / "scenarios"
+    if not scenarios_dir.is_dir():
+        return {}
+
+    discovered = {}
+    for finder, name, _ in pkgutil.iter_modules([str(scenarios_dir)]):
+        if name.startswith("_"):
+            continue
+        try:
+            module = importlib.import_module(f"fake_data.scenarios.{name}")
+        except (ImportError, SyntaxError) as e:
+            print(f"  Warning: could not import scenarios/{name}.py: {e}")
+            continue
+
+        meta = getattr(module, "SCENARIO_META", None)
+        if meta is None:
+            continue
+
+        # Find the scenario class (convention: class ending in "Scenario")
+        cls = None
+        for attr_name in dir(module):
+            obj = getattr(module, attr_name)
+            if (isinstance(obj, type)
+                    and attr_name.endswith("Scenario")
+                    and attr_name != "BaseScenario"):
+                cls = obj
+                break
+
+        if cls:
+            try:
+                discovered[meta["scenario_id"]] = {
+                    "meta": meta,
+                    "instance": cls(),
+                }
+            except Exception as e:
+                print(f"  Warning: could not instantiate {attr_name}: {e}")
+
+    return discovered
+
+
+def expand_scenarios(scenarios: str) -> list:
+    """Expand a scenario specification string into active scenario instances.
 
     Args:
         scenarios: Comma-separated list of scenario names, "all", or "none".
 
     Returns:
-        Empty list (always, in X1).
+        List of scenario instances.
     """
-    return []
+    if scenarios == "none":
+        return []
+
+    discovered = discover_scenarios()
+
+    if scenarios == "all":
+        return [info["instance"] for info in discovered.values()]
+
+    names = [n.strip() for n in scenarios.split(",")]
+    active = []
+    for name in names:
+        if name in discovered:
+            active.append(discovered[name]["instance"])
+        else:
+            print(f"  Warning: scenario '{name}' not found, skipping")
+    return active
 
 
 # =============================================================================
