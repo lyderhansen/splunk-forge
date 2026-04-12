@@ -78,9 +78,11 @@ def generate_TEMPLATE_logs(
                 second = random.randint(0, 59)
                 events.append(_make_event(start_date, day, hour, minute, second))
 
-            # Scenario events (future): active_scenarios would inject here
-            # for scenario in active_scenarios:
-            #     events.extend(scenario.source_hour(day, hour))
+            # Inject scenario events
+            for scenario in active_scenarios:
+                method = getattr(scenario, f"{SOURCE_META['source_id']}_hour", None)
+                if method:
+                    events.extend(method(day, hour))
 
     # Sort by timestamp for realistic ordering
     events.sort(key=lambda e: e.get("timestamp", ""))
@@ -117,7 +119,7 @@ def _make_event(start_date: str, day: int, hour: int,
         "action": random.choice(["login", "logout", "access", "modify"]),
         "status": random.choice(["success", "failure"]),
         "source_ip": f"10.{random.randint(1,254)}.{random.randint(1,254)}.{random.randint(1,254)}",
-        # Scenario events (future) would set: "demo_id": <scenario_name>
+        # Scenario events set "demo_id" via their _hour() methods.
         # Baseline events leave demo_id unset.
     }
 
