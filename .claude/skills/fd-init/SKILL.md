@@ -223,14 +223,40 @@ Use Python-style logic (execute mentally or describe to yourself):
 **TENANT_ID:** Generate a deterministic UUID from ORG_NAME using UUID5 with DNS namespace:
 `uuid.uuid5(uuid.NAMESPACE_DNS, ORG_NAME.lower())` — write the result as a string.
 
+**ROLES:** Define a fixed set of roles used across the organization. Each user gets one role. Roles determine access levels in generated logs (e.g. admin users trigger privileged-access events in WinEventLog, Entra ID, etc.):
+
+```python
+ROLES = [
+    "user",           # standard employee — ~70% of users
+    "power_user",     # elevated access (developers, analysts) — ~15%
+    "admin",          # IT admin, domain admin — ~10%
+    "service_account", # non-human accounts (backups, monitoring) — ~5%
+]
+```
+
+Always ensure at least 2 admin users and 2 service accounts exist, regardless of employee_count. Distribute remaining users as: ~70% user, ~15% power_user, ~10% admin, ~5% service_account.
+
 **USERS list:** Seed a random generator with `hash(ORG_NAME)` for determinism. For each employee (up to `employee_count`):
 - Pick a first name and last name from the bundled lists. Cycle through them if employee_count > list length.
-- username: `firstname.lastname` (all lowercase). If duplicate, append a digit.
+- username: `firstname.lastname` (all lowercase). If duplicate, append a digit. Service accounts use format: `svc.<function>` (e.g. `svc.backup`, `svc.monitoring`).
 - email: `username@<TENANT>`
 - location: distribute across locations by their employee percentages
-- department: cycle through `["engineering", "sales", "marketing", "finance", "hr", "it", "operations"]`
+- department: cycle through `["engineering", "sales", "marketing", "finance", "hr", "it", "operations"]`. Admins and service accounts always belong to `"it"`.
+- role: assign from ROLES distribution above
+- title: derive from role + department (e.g. role=admin + dept=it -> "IT Administrator", role=user + dept=sales -> "Sales Representative")
+- user_id: deterministic GUID via `uuid.uuid5(uuid.NAMESPACE_DNS, ORG_NAME.lower() + "." + username)` — consistent across re-runs
+- workstation: `WS-<LOC>-<NNN>` where LOC is the location ID and NNN is a zero-padded index per location (e.g. `WS-HQ1-001`). Service accounts get `SRV-<LOC>-<NN>` instead.
+- workstation_ip: assigned sequentially from the location's subnet. If subnet is `10.10.0.0/16`, first user at that location gets `10.10.10.1`, second gets `10.10.10.2`, etc. Start at `.10.1` to leave room for infrastructure IPs (.0.x = gateways/DNS).
+- mac_address: deterministic from global user index: `AA:BB:CC:<loc_octet>:<hi>:<lo>` where loc_octet is derived from location index (01, 02, 03...).
+- phone: `+1-555-<NNNN>` where NNNN is zero-padded user index. Service accounts have no phone (set to `null`).
+- manager: for role=user and role=power_user, pick a random user with role=admin or role=power_user from the same location. For role=admin, manager is `null` (top of hierarchy). For service_account, manager is `null`.
 
-Generate the full USERS list as Python code — each entry is a dict with keys: `username`, `full_name`, `email`, `location`, `department`.
+Generate the full USERS list as Python code — each entry is a dict with keys: `username`, `full_name`, `email`, `location`, `department`, `role`, `title`, `user_id`, `workstation`, `workstation_ip`, `mac_address`, `phone`, `manager`.
+
+Also generate a module-level constant:
+```python
+ROLES = ["user", "power_user", "admin", "service_account"]
+```
 
 **NETWORK_CONFIG:** Based on the chosen IP plan, assign a /16 subnet per location:
 - If `10.0.0.0/8`: location 1 = `10.10.0.0/16`, location 2 = `10.20.0.0/16`, location 3 = `10.30.0.0/16`, etc.
@@ -248,12 +274,20 @@ Generate the full `world.py` file content as a Python module with:
 - Module docstring mentioning ORG_NAME and generation date
 - `from typing import Optional, List, Dict`
 - `ORG_NAME`, `ORG_NAME_LOWER`, `TENANT`, `TENANT_ID`, `INDUSTRY` constants
+- `ROLES` list
 - `LOCATIONS` dict (keyed by location ID)
 - `NETWORK_CONFIG` dict (keyed by location ID)
 - `EXTERNAL_IP_POOL` list
 - `EXTERNAL_IP_POOL_BY_COUNTRY` dict
-- `USERS` list (all generated users)
-- Helper functions `get_user_by_username(username)` and `users_at_location(location_id)`
+- `USERS` list (all generated users, each with full field set: username, full_name, email, location, department, role, title, user_id, workstation, workstation_ip, mac_address, phone, manager)
+- Helper functions:
+  - `get_user_by_username(username: str) -> Optional[Dict]`
+  - `users_at_location(location_id: str) -> List[Dict]`
+  - `users_by_role(role: str) -> List[Dict]` — filter USERS by role (e.g. `users_by_role("admin")`)
+  - `get_user_by_ip(ip: str) -> Optional[Dict]` — find user by workstation_ip
+  - `get_user_by_workstation(hostname: str) -> Optional[Dict]` — find user by workstation name
+  - `admins() -> List[Dict]` — shortcut for `users_by_role("admin")`
+  - `service_accounts() -> List[Dict]` — shortcut for `users_by_role("service_account")`
 
 ### C.4 Compose manifest.py content
 
