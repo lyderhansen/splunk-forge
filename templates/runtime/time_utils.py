@@ -78,7 +78,7 @@ def calc_natural_events(base_count: int, start_date: str, day_offset: int,
     Returns:
         Integer event count, never less than 0.
     """
-    from config import (
+    from fake_data.config import (
         VOLUME_WEEKEND_FACTORS, VOLUME_MONDAY_BOOST,
         VOLUME_DAILY_NOISE_MIN, VOLUME_DAILY_NOISE_MAX,
         HOUR_ACTIVITY_WEEKDAY, HOUR_ACTIVITY_WEEKEND,
