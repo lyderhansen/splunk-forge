@@ -46,15 +46,28 @@ CP_DIMMED = 5
 CP_HEADER = 6
 CP_STATUS = 7
 
-# Box-drawing characters (double-line)
-BOX_TL = "\u2554"  # ╔
-BOX_TR = "\u2557"  # ╗
-BOX_BL = "\u255a"  # ╚
-BOX_BR = "\u255d"  # ╝
-BOX_H = "\u2550"   # ═
-BOX_V = "\u2551"   # ║
-BOX_TJ = "\u2566"  # ╦
-BOX_BJ = "\u2569"  # ╩
+# Box-drawing characters
+# Use single-line Unicode (widely supported) with ASCII fallback
+try:
+    # Test if terminal can handle Unicode box-drawing
+    "\u250c".encode(sys.stdout.encoding or "utf-8")
+    BOX_TL = "\u250c"  # ┌
+    BOX_TR = "\u2510"  # ┐
+    BOX_BL = "\u2514"  # └
+    BOX_BR = "\u2518"  # ┘
+    BOX_H = "\u2500"   # ─
+    BOX_V = "\u2502"   # │
+    BOX_TJ = "\u252c"  # ┬
+    BOX_BJ = "\u2534"  # ┴
+except (UnicodeEncodeError, LookupError):
+    BOX_TL = "+"
+    BOX_TR = "+"
+    BOX_BL = "+"
+    BOX_BR = "+"
+    BOX_H = "-"
+    BOX_V = "|"
+    BOX_TJ = "+"
+    BOX_BJ = "+"
 
 
 # =============================================================================
@@ -103,7 +116,7 @@ class TUIState:
         self.cfg_start_date = DEFAULT_START_DATE
         self.cfg_days = DEFAULT_DAYS
         self.cfg_scale = DEFAULT_SCALE
-        self.cfg_show_files = False
+        # cfg_show_files removed — --show-files is a standalone command, not a generation flag
         self.cfg_quiet = False
 
         # Navigation
@@ -230,7 +243,7 @@ class TUIState:
 
     def config_row_count(self):
         """Number of rows in config section."""
-        return 5  # start_date, days, scale, show_files, quiet
+        return 4  # start_date, days, scale, quiet
 
     def section_row_count(self, sec):
         if sec == SEC_SOURCES:
@@ -246,7 +259,6 @@ class TUIState:
             ("Start Date", self.cfg_start_date, "cfg_start_date", "text"),
             ("Days", str(self.cfg_days), "cfg_days", "int"),
             ("Scale", str(self.cfg_scale), "cfg_scale", "float"),
-            ("Show Files", self.cfg_show_files, "cfg_show_files", "bool"),
             ("Quiet", self.cfg_quiet, "cfg_quiet", "bool"),
         ]
 
@@ -281,8 +293,6 @@ class TUIState:
         parts.append(f"--start-date={self.cfg_start_date}")
         parts.append(f"--scale={self.cfg_scale}")
         parts.append(f"--scenarios={self.active_scenarios_str()}")
-        if self.cfg_show_files:
-            parts.append("--show-files")
         if self.cfg_quiet:
             parts.append("--quiet")
         return " ".join(parts)
@@ -295,8 +305,6 @@ class TUIState:
         argv.append(f"--start-date={self.cfg_start_date}")
         argv.append(f"--scale={self.cfg_scale}")
         argv.append(f"--scenarios={self.active_scenarios_str()}")
-        if self.cfg_show_files:
-            argv.append("--show-files")
         if self.cfg_quiet:
             argv.append("--quiet")
         return argv
