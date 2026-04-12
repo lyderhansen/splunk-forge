@@ -36,7 +36,8 @@ fake-data/
 │       │   └── SKILL.md
 │       ├── fd-add-generator/    # ✅ X1 — generator scaffolding (sample + wizard)
 │       │   └── SKILL.md
-│       ├── fd-discover/         # future (X2)
+│       ├── fd-discover/         # ✅ X2 — log format discovery with research
+│       │   └── SKILL.md
 │       ├── fd-add-scenario/     # future (X5)
 │       └── fd-generate/         # future (X5)
 ├── templates/
