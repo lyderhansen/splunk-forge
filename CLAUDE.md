@@ -24,31 +24,33 @@ All markdown files, code comments, and docstrings MUST be written in English.
 
 All meaningful changes MUST be documented in `CHANGEHISTORY.md`, newest first, with UTC date/time and a short description.
 
-## Directory layout (planned)
+## Directory layout
 
 ```
 fake-data/
 ├── .claude-plugin/
 │   └── plugin.json              # plugin manifest
 ├── .claude/
-│   └── skills/                  # the skills this plugin ships
-│       ├── init/
-│       ├── discover-logformat/
-│       ├── add-generator/
-│       ├── add-scenario/
-│       └── generate-logs/
+│   └── skills/
+│       ├── init/                # ✅ X1 — workspace creation wizard
+│       │   └── SKILL.md
+│       ├── add-generator/       # ✅ X1 — generator scaffolding (sample + wizard)
+│       │   └── SKILL.md
+│       ├── discover-logformat/  # future (X2)
+│       ├── add-scenario/        # future (X5)
+│       └── generate-logs/       # future (X5)
 ├── templates/
-│   ├── runtime/                 # Python files copied into user repo
-│   │   ├── time_utils.py
-│   │   ├── config.py
-│   │   ├── world_loader.py
-│   │   └── main_generate.py
-│   ├── generators/
-│   │   └── _template_generator.py
-│   └── schema/
-│       ├── world.yaml.example
-│       ├── sources.yaml.example
-│       └── scenarios.yaml.example
+│   ├── runtime/                 # Python files copied into user repo by init
+│   │   ├── config.py            # ✅ defaults, volume params, output paths
+│   │   ├── time_utils.py        # ✅ timestamp formatters, calc_natural_events
+│   │   └── main_generate.py     # ✅ orchestrator with filesystem discovery
+│   └── generators/
+│       └── _template_generator.py  # ✅ generator skeleton with SOURCE_META
+├── data/                        # read by skills at invocation time (not copied)
+│   ├── names_sample.py          # ✅ ~200 first + ~200 last names
+│   └── country_ip_ranges.py     # ✅ 20 countries -> public CIDR ranges
+├── presets/                     # empty — reserved for X2+
+│   └── README.md
 ├── docs/
 │   └── superpowers/
 │       ├── specs/
