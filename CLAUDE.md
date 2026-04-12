@@ -44,6 +44,8 @@ fake-data/
 │       │   └── SKILL.md
 │       ├── fd-generate/         # ✅ X5 — guided generation wizard
 │       │   └── SKILL.md
+│       ├── fd-cim/              # ✅ X7 — CIM field mapping
+│       │   └── SKILL.md
 │       └── fd-build-app/        # ✅ X6 — Splunk TA generation
 │           └── SKILL.md
 ├── templates/

@@ -2,6 +2,14 @@
 
 Newest entries first.
 
+## 2026-04-12 ~09:00 UTC — fd-cim: CIM field mapping skill
+Files: `.claude/skills/fd-cim/SKILL.md`, `docs/superpowers/specs/2026-04-12-fd-cim-design.md`
+
+Maps generator fields to Splunk CIM data models. Rule-based pattern matching
+with sonnet research fallback for unmapped fields. Produces CIM_MAPPING files
+in fake_data/cim/ that fd-build-app consumes when generating local/props.conf
+with FIELDALIAS, EVAL, LOOKUP, eventtypes, and tags.
+
 ## 2026-04-12 ~08:00 UTC — fd-build-app: Splunk TA generation
 Files: `.claude/skills/fd-build-app/SKILL.md`
 
