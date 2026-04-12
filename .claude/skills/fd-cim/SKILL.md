@@ -386,7 +386,7 @@ If syntax check fails, fix the file and re-check.
 
 ## Phase F -- Handoff
 
-Print:
+### F.1 Print summary
 
 ```
 CIM mapping created: fake_data/cim/<source_id>.py
@@ -394,12 +394,25 @@ CIM mapping created: fake_data/cim/<source_id>.py
   Aliases:  <count> field mappings
   Evals:    <count> calculated fields
   Lookups:  asset_inventory, identity_inventory
-
-Next: /fd-build-app will use this mapping when generating the Splunk TA.
-  Run: /fd-build-app <source_id>
 ```
 
 If `fake_data/cim/__init__.py` was just created, also print:
 ```
   Created: fake_data/cim/__init__.py (package marker)
 ```
+
+### F.2 Chain to fd-build-app
+
+Ask the user:
+
+> "CIM mapping saved. Build the Splunk app now?
+>
+>   1. **yes** — Run /fd-build-app to generate the Splunk TA using this CIM mapping
+>   2. **skip** — I'll add CIM mappings for more generators first (or build later)
+> [2]"
+
+Default is **skip** because users often want to add CIM mappings for
+multiple generators before building the final TA.
+
+If **yes**: invoke `/fd-build-app`
+If **skip**: stop here.

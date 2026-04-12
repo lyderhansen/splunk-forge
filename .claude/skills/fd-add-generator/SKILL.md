@@ -390,24 +390,35 @@ If syntax check fails, fix the file and re-check.
 
 ## Phase E — Handoff
 
-Print:
+### E.1 Print summary
 
 ```
 Generator created: fake_data/generators/generate_<source_id>.py
 
-Next steps:
-  1. Review the generator and tune field values:
-     open fake_data/generators/generate_<source_id>.py
-
-  2. Test it standalone:
-     python3 fake_data/generators/generate_<source_id>.py --days=1 --quiet
-
-  3. Run via orchestrator:
-     python3 fake_data/main_generate.py --days=1
-
-  4. Check the output:
-     ls fake_data/output/<category>/
-     head fake_data/output/<category>/<source_id>.log
-
 Fields with "TODO_<name>" placeholders need your manual attention.
+```
+
+### E.2 Chain to next skill
+
+Ask the user:
+
+> "Generator created. What would you like to do next?
+>
+>   1. **Add CIM mapping** — Run /fd-cim <source_id> for proper Splunk field aliases
+>   2. **Create a scenario** — Run /fd-add-scenario to inject correlated events using this generator
+>   3. **Generate logs** — Run /fd-generate to produce output
+>   4. **Skip** — I'll do it myself later
+> [1]"
+
+Based on the user's choice:
+- **1**: invoke `/fd-cim <source_id>`
+- **2**: invoke `/fd-add-scenario` (user will be prompted for scenario details)
+- **3**: invoke `/fd-generate --sources=<source_id>`
+- **4**: print the manual commands:
+
+```
+Manual commands:
+  Review:      open fake_data/generators/generate_<source_id>.py
+  Test:        python3 fake_data/generators/generate_<source_id>.py --days=1 --quiet
+  Orchestrate: python3 fake_data/main_generate.py --days=1
 ```

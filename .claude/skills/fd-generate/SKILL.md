@@ -117,18 +117,29 @@ Stream output to the user.
 
 ## Phase D -- Handoff
 
-Show:
+### D.1 Print output summary
 
 ```
 Generation complete!
 
 Output files:
   ls fake_data/output/
+```
 
-Tips:
-  - Launch the TUI for interactive generation:
-    python3 fake_data/tui_generate.py
+### D.2 Chain to fd-build-app
 
-  - Build a Splunk app to ingest these logs:
-    /fd-build-app (coming soon)
+Ask the user:
+
+> "Logs generated. Build the Splunk app now?
+>
+>   1. **yes** — Run /fd-build-app to package everything as an installable Splunk TA
+>   2. **skip** — I just wanted the log files, thanks
+> [1]"
+
+If **yes**: invoke `/fd-build-app`
+If **skip**: print a tip:
+
+```
+Tip: Launch the TUI for interactive re-runs:
+  python3 fake_data/tui_generate.py
 ```

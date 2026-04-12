@@ -485,7 +485,20 @@ Artifacts written to fake_data/discover/<source_id>/:
   - REPORT.md      (human-readable summary)
   - samples/       (<N> log samples)
   - research.json  (audit trail)
-
-Next step: review REPORT.md, then run:
-  /fd-add-generator <source_id>
 ```
+
+### F.3 Chain to fd-add-generator
+
+Ask the user:
+
+> "Want me to scaffold the generator now? SPEC.py is ready, so I can
+> create `fake_data/generators/generate_<source_id>.py` immediately.
+>
+>   1. **yes** — Run /fd-add-generator <source_id> now
+>   2. **skip** — I'll do it myself later
+> [1]"
+
+If **yes**: invoke `/fd-add-generator <source_id>` directly. The generator
+skill will auto-detect the SPEC.py and skip its wizard.
+
+If **skip**: stop here. The user can run the command manually.

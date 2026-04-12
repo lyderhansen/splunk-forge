@@ -499,24 +499,33 @@ If this fails:
 
 ## Phase G -- Handoff
 
-Print:
+### G.1 Print summary
 
 ```
 Scenario created: fake_data/scenarios/<scenario_id>.py
+  Phases:  <N>  (days <start_day>-<end_day>)
+  Sources: <comma-separated source_ids>
+```
 
-Next steps:
-  1. Review and tune the scenario:
-     open fake_data/scenarios/<scenario_id>.py
+### G.2 Chain to fd-generate
 
-  2. Test it standalone:
-     python3 -c "from fake_data.scenarios.<scenario_id> import <Class>Scenario; s = <Class>Scenario(); print(s.config)"
+Ask the user:
 
-  3. Generate logs with this scenario:
-     python3 fake_data/main_generate.py --days=7 --scenarios=<scenario_id>
+> "Scenario created. Generate logs with this scenario now?
+>
+>   1. **yes** — Run /fd-generate with --scenarios=<scenario_id> and a
+>      day count that covers the scenario window (<end_day + 2>)
+>   2. **skip** — I'll do it myself later
+> [1]"
 
-  4. Generate with all scenarios:
-     python3 fake_data/main_generate.py --days=31 --scenarios=all
+If **yes**: invoke `/fd-generate --scenarios=<scenario_id> --days=<end_day+2>`
 
-  5. Check for demo_id correlation in Splunk:
-     index=* demo_id=<scenario_id> | stats count by sourcetype
+If **skip**: print the manual commands:
+
+```
+Manual commands:
+  Review:     open fake_data/scenarios/<scenario_id>.py
+  Generate:   python3 fake_data/main_generate.py --days=<N> --scenarios=<scenario_id>
+  All:        python3 fake_data/main_generate.py --days=31 --scenarios=all
+  Splunk:     index=* demo_id=<scenario_id> | stats count by sourcetype
 ```

@@ -90,6 +90,43 @@ Check if `fake_data/cim/` directory exists. If yes, for each `<source_id>.py` fi
 
 If `fake_data/cim/` doesn't exist or is empty, `cim_mappings = {}`.
 
+### A.6 Offer to fill CIM gaps
+
+Count generators with pre-built CIM mappings vs without:
+- `total_generators` = number of generators from A.3
+- `has_cim` = number of generators where `source_id in cim_mappings`
+- `missing_cim` = list of source_ids where `source_id not in cim_mappings`
+
+If `len(missing_cim) > total_generators / 2` (more than 50% missing),
+offer the user a chance to fill the gaps BEFORE continuing to Phase B:
+
+> "You have <total_generators> generators but only <has_cim> have pre-built
+> CIM mappings (from /fd-cim). The rest will get auto-generated CIM mappings
+> based on field name patterns.
+>
+> For better CIM alignment, you can run /fd-cim for each missing generator
+> first. Missing CIM mappings:
+>   - <source_id_1>
+>   - <source_id_2>
+>   ...
+>
+> What would you like to do?
+>   1. **Add CIM mappings now** — Run /fd-cim for each missing generator,
+>      then continue here
+>   2. **Continue with auto-generated** — Let fd-build-app generate CIM
+>      mappings on the fly
+>   3. **Cancel**
+> [2]"
+
+If **1**: For each missing generator, invoke `/fd-cim <source_id>`. After
+all complete, re-run A.5 to re-scan CIM mappings, then continue to Phase B.
+
+If **2**: Continue to Phase B with auto-generation fallback for missing ones.
+
+If **3**: Stop.
+
+If fewer than 50% are missing, skip this prompt entirely and continue to Phase B.
+
 ### A.7 Check output directory
 
 Check `fake_data/output/` -- list existing log files per generator to confirm
