@@ -78,11 +78,14 @@ def generate_TEMPLATE_logs(
                 second = random.randint(0, 59)
                 events.append(_make_event(start_date, day, hour, minute, second))
 
-            # Inject scenario events
+            # Inject scenario events (returned as pre-formatted strings)
             for scenario in active_scenarios:
                 method = getattr(scenario, f"{SOURCE_META['source_id']}_hour", None)
                 if method:
-                    events.extend(method(day, hour))
+                    for line in method(day, hour):
+                        events.append({"timestamp": ts_iso(start_date, day, hour,
+                                        random.randint(0, 59), random.randint(0, 59)),
+                                        "_scenario_line": line})
 
     # Sort by timestamp for realistic ordering
     events.sort(key=lambda e: e.get("timestamp", ""))
@@ -96,7 +99,10 @@ def generate_TEMPLATE_logs(
 
     with open(output_path, "w") as f:
         for event in events:
-            f.write(_serialize(event) + "\n")
+            if "_scenario_line" in event:
+                f.write(event["_scenario_line"] + "\n")
+            else:
+                f.write(_serialize(event) + "\n")
 
     if not quiet:
         print(f"  {SOURCE_META['source_id']}: {len(events):,} events "
