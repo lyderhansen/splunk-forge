@@ -15,4 +15,5 @@ venv/
 # Scratch / test output
 .planning/discover/
 full_test_*/
+yolo_test*/
 tmp/
