@@ -766,7 +766,8 @@ wc -l fake_data/output/web/acme_web.log      # > 0
 | 5 | **generate-logs** | Thin skill wrapper around `python3 main_generate.py`. Claude-assisted "suggest scenarios" and "explain output" flow. | Small |
 | 6 | **build-splunk-app** | Largest future plan. Generate complete Splunk TA with props.conf, transforms.conf, inputs.conf, app.conf, dashboards, packaged as SPL. Includes `output/tmp/` staging + atomic move + `--test`/`--no-test` flags. | Large |
 | 7 | **package** | Bundle workspace + Splunk app as one deliverable. | Small |
-| 8 | **TA-FAKE-TSHRT migration** | Migrate TA-FAKE-TSHRT to consume fake-data plugin. 26 generators, 11 scenarios, 195 users. **SAFETY: create a full copy of the TA-FAKE-TSHRT repo before starting. Work on a branch or a separate directory. The working original must never be touched directly.** | Large |
+| 8 | **fd-world skill** | New skill `/fd-world` for modifying the organization after init. Subcommands: `add-users 50`, `add-location "Berlin, DE"`, `add-infra plc HQ1`, `show`, `resize 200`. Edits world.py programmatically. | Medium |
+| 9 | **TA-FAKE-TSHRT migration** | Migrate TA-FAKE-TSHRT to consume fake-data plugin. 26 generators, 11 scenarios, 195 users. **SAFETY: create a full copy of the TA-FAKE-TSHRT repo before starting. Work on a branch or a separate directory. The working original must never be touched directly.** | Large |
 
 ## Open questions
 
