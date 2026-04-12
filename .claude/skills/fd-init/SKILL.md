@@ -42,41 +42,96 @@ If `DIR_EXISTS`: stop and print:
 
 ---
 
-## Phase B — Interactive question gathering
+## Phase B — Setup mode selection
+
+The first question determines the entire flow. Ask this before anything else.
+
+### B.0 Mode selection
+
+> "How would you like to set up your FAKE_DATA workspace?
+>
+>   1. **Quick start** — I'll create a workspace with sensible defaults in seconds. You can edit world.py afterwards.
+>   2. **Custom setup** — You control the organization name, industry, locations, IP plan, and more.
+>   3. **Just data** — Minimal workspace with generic defaults. Skip straight to creating generators.
+>
+> Pick 1, 2, or 3: [1]"
+
+**If Quick start (1):** Use these defaults silently, skip to Phase B.quick below.
+**If Custom setup (2):** Continue to Phase B.custom below (the full wizard).
+**If Just data (3):** Use same defaults as Quick start, skip to Phase B.quick, and after Phase F handoff, immediately suggest: "Ready to create your first generator. What data source would you like? (e.g. `firewall`, `web_access`, `cloud_audit`)" and then invoke `/fd-add-generator` with the user's answer.
+
+---
+
+### Phase B.quick — Quick start defaults
+
+Use these values without asking any questions:
+
+- `ORG_NAME` = `"Example Corp"`
+- `INDUSTRY` = `"generic"`
+- `employee_count` = `100`
+- `location_count` = `2`
+- Location 1: `HQ1`, "Headquarters", "New York", "US", "America/New_York", 60%
+- Location 2: `OFF1`, "Branch Office", "London", "GB", "Europe/London", 40%
+- `TENANT` = `"examplecorp.com"`
+- `ip_plan` = `"10.0.0.0/8"`
+- `purpose` = not set (generic)
+
+Skip directly to **Phase C** (generate content in memory). The review gate in Phase D will show the defaults so the user can still edit before writing.
+
+---
+
+### Phase B.custom — Full interactive wizard
 
 Ask these questions **one at a time**. Wait for each answer before asking the next. Use defaults in brackets if the user just presses enter or says "default".
 
-### B.1 Organization name
+#### B.custom.1 Organization name
 
 > "What is the name of the fictional organization? [Example Corp]"
 
 Store as `ORG_NAME`. Default: `"Example Corp"`.
 
-### B.2 Real company check
+#### B.custom.2 Real company check
 
 > "Is this based on a real company? If yes, I'll research public information to prefill defaults. [no]"
 
-If yes: run **Phase B.1-research** below before continuing. If no: continue to B.3.
+If yes: run **Phase B.research** below before continuing. If no: continue.
 
-### B.3 Industry
+#### B.custom.3 Purpose / goal (NEW)
+
+> "What do you want to use these logs for? Describe briefly — this helps me suggest the right generators and scenarios later.
+>
+> Examples:
+>   - 'Demonstrate network visibility using firewall and netflow data'
+>   - 'SOC training with realistic attack scenarios'
+>   - 'Test Splunk dashboards for a retail e-commerce platform'
+>   - 'Just generic logs for development and testing'
+>
+> [just generic logs]"
+
+Store as `purpose`. Default: `"just generic logs"`. This value is:
+- Saved in `manifest.py` as `PURPOSE_AT_INIT` for future skills to reference
+- Used in Phase F handoff to suggest specific generators and scenarios
+- NOT used to change any technical defaults (world.py, config.py are the same regardless of purpose)
+
+#### B.custom.4 Industry
 
 > "What industry? Pick one: retail, manufacturing, saas, financial, healthcare, generic [generic]"
 
 Store as `INDUSTRY`. Default: `"generic"` (or from research).
 
-### B.4 Employee count
+#### B.custom.5 Employee count
 
 > "How many employees total? [100]"
 
 Store as `employee_count`. Default: `100` (or from research).
 
-### B.5 Number of locations
+#### B.custom.6 Number of locations
 
 > "How many office locations? [2]"
 
 Store as `location_count`. Default: `2` (or from research).
 
-### B.6 Location details
+#### B.custom.7 Location details
 
 For each location (1 through location_count), ask:
 
@@ -87,13 +142,13 @@ Parse each answer into: `name`, `city`, `country`, `timezone`, `employee_pct`. G
 
 If percentages don't sum to 100%, normalize them proportionally.
 
-### B.7 Primary domain
+#### B.custom.8 Primary domain
 
 > "What is the primary email/web domain? [<orgname_lower>.com]"
 
 Store as `TENANT`. Default: derive from ORG_NAME (lowercase, remove spaces and special chars, append `.com`).
 
-### B.8 Internal IP plan
+#### B.custom.9 Internal IP plan
 
 > "Which internal IP range? Pick one: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 [10.0.0.0/8]"
 
@@ -186,6 +241,8 @@ FAKE_DATA_WORKSPACE_VERSION = 1
 INITIALIZED_AT = "<current UTC ISO-8601>"
 PLUGIN_VERSION_AT_INIT = "0.1.0"
 ORG_NAME_AT_INIT = "<ORG_NAME>"
+SETUP_MODE = "<quick/custom/just-data>"
+PURPOSE_AT_INIT = "<purpose or empty string if not set>"
 ```
 
 ### C.5 Compose README.md content
@@ -270,16 +327,57 @@ If this fails, something went wrong — report the error to the user.
 
 ## Phase F — Handoff
 
-Print:
+### F.1 Print workspace summary
 
 ```
 FAKE_DATA workspace created at ./fake_data/
 
+  Organization:  <ORG_NAME>
+  Users:         <employee_count>
+  Locations:     <location_count>
+```
+
+### F.2 Suggest next steps based on purpose and mode
+
+**If mode was "just-data":** Skip the "inspect world.py" step and go straight to suggesting a generator. Ask:
+
+> "Workspace ready. What data source would you like to generate first?
+> Examples: `firewall`, `web_access`, `cloud_audit`, `wineventlog`
+>
+> Or paste a log sample file path and I'll detect the format automatically."
+
+Then invoke `/fd-add-generator` with the user's answer.
+
+**If purpose was set (custom mode):** Analyze the purpose text and suggest specific generators. Examples:
+
+- Purpose mentions "firewall" or "network visibility" → suggest: `fortigate`, `cisco_asa`, `meraki`
+- Purpose mentions "SOC" or "attack" or "security" → suggest: `wineventlog`, `sysmon`, `entraid`, and mention that attack scenarios come in a future version
+- Purpose mentions "retail" or "e-commerce" → suggest: `access_combined`, `orders`
+- Purpose mentions "cloud" → suggest: `aws_cloudtrail`, `gcp_audit`, `entraid`
+- Purpose mentions "Splunk dashboards" or "testing" → suggest: whatever fits the industry
+
+Print:
+
+```
+Based on your goal ("<purpose>"), I'd suggest starting with these generators:
+  - <suggestion_1> — <why>
+  - <suggestion_2> — <why>
+  - <suggestion_3> — <why>
+
+To create your first generator:
+  /fd-add-generator <source_id>
+  /fd-add-generator <source_id> --sample=<path>   (if you have a log sample)
+```
+
+**If purpose was not set (quick mode or skipped):** Print generic next steps:
+
+```
 Next steps:
   1. Inspect fake_data/world.py  -- your organization's fictional state
   2. Verify the runtime:  python3 fake_data/main_generate.py --help
-  3. Add your first generator:  /fd-add-generator <source_id>
-     Use --sample=<path> if you have a log file, or answer wizard questions.
+  3. Add your first generator:
+       /fd-add-generator <source_id>
+       /fd-add-generator <source_id> --sample=<path>
 
 Currently 0 sources are registered. Generators live in fake_data/generators/
 and are auto-discovered by main_generate.py at runtime.
