@@ -2,6 +2,15 @@
 
 Newest entries first.
 
+## 2026-04-12 ~07:00 UTC — fd-generate + TUI: generation interfaces
+Files: `.claude/skills/fd-generate/SKILL.md`, `templates/runtime/tui_generate.py`,
+       `templates/runtime/main_generate.py` (--tui flag)
+
+Two interfaces for running log generation: curses-based TUI (tui_generate.py)
+with 3-section layout, dependency auto-inclusion, and inline config editing;
+and fd-generate Claude Code skill with wizard-based source/scenario selection.
+main_generate.py updated with --tui flag to launch TUI directly.
+
 ## 2026-04-12 ~06:00 UTC — fd-world: interactive world.py editing
 Files: `.claude/skills/fd-world/SKILL.md`
 

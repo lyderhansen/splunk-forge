@@ -42,12 +42,15 @@ fake-data/
 │       │   └── SKILL.md
 │       ├── fd-world/            # ✅ X4 — interactive world.py CRUD
 │       │   └── SKILL.md
-│       └── fd-generate/         # future (X5)
+│       ├── fd-generate/         # ✅ X5 — guided generation wizard
+│       │   └── SKILL.md
+│       └── fd-build-app/        # future (X6)
 ├── templates/
 │   ├── runtime/                 # Python files copied into user repo by init
 │   │   ├── config.py            # ✅ defaults, volume params, output paths
 │   │   ├── time_utils.py        # ✅ timestamp formatters, calc_natural_events
-│   │   └── main_generate.py     # ✅ orchestrator with filesystem discovery
+│   │   ├── main_generate.py     # ✅ orchestrator with filesystem discovery
+│   │   └── tui_generate.py      # ✅ curses TUI for interactive generation
 │   ├── generators/
 │   │   └── _template_generator.py  # ✅ generator skeleton with SOURCE_META
 │   └── scenarios/
