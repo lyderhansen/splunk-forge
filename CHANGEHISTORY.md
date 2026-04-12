@@ -2,6 +2,14 @@
 
 Newest entries first.
 
+## 2026-04-12 ~06:00 UTC — fd-world: interactive world.py editing
+Files: `.claude/skills/fd-world/SKILL.md`
+
+Interactive CRUD skill for viewing and modifying world.py after init.
+Add/edit/remove users, locations, and infrastructure with review gates.
+Direct file editing preserves manual changes. Handles both enriched and
+basic world.py variants.
+
 ## 2026-04-12 ~05:00 UTC — fd-add-scenario: scenario system
 Files: `.claude/skills/fd-add-scenario/SKILL.md`, `templates/scenarios/_base.py`,
        `templates/scenarios/__init__.py`, `templates/runtime/config.py`,

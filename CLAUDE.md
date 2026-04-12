@@ -40,6 +40,8 @@ fake-data/
 │       │   └── SKILL.md
 │       ├── fd-add-scenario/     # ✅ X3 — scenario creation with research
 │       │   └── SKILL.md
+│       ├── fd-world/            # ✅ X4 — interactive world.py CRUD
+│       │   └── SKILL.md
 │       └── fd-generate/         # future (X5)
 ├── templates/
 │   ├── runtime/                 # Python files copied into user repo by init
