@@ -57,6 +57,21 @@ SOURCE_META = {
     #     "field": "LogName",
     #     "template": "FAKE:WinEventLog:{value}",  # {value} is replaced at index time
     # },
+
+    # ─── OPTIONAL: Magic 6 props.conf overrides ──────────────────────────
+    # fd-build-app ALWAYS writes SHOULD_LINEMERGE, LINE_BREAKER, TIME_PREFIX,
+    # TIME_FORMAT, MAX_TIMESTAMP_LOOKAHEAD, TRUNCATE on every [FAKE:<id>]
+    # stanza. If you leave this dict unset, fd-build-app uses format-defaults.
+    # Set ONLY the keys you need to override — e.g. multi-line events need
+    # a custom LINE_BREAKER that splits on the next event header.
+    #
+    # "props_overrides": {
+    #     "LINE_BREAKER": r"([\r\n]+)(?=\d{4}-\d{2}-\d{2})",
+    #     "TIME_PREFIX": "^",
+    #     "TIME_FORMAT": "%Y-%m-%d %H:%M:%S",
+    #     "MAX_TIMESTAMP_LOOKAHEAD": 30,
+    #     "TRUNCATE": 50000,
+    # },
 }
 
 

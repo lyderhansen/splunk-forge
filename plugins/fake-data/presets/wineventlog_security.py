@@ -26,6 +26,20 @@ PRESET = {
         "template": "FAKE:WinEventLog:{value}",
     },
 
+    # ─── Magic 6 overrides for multi-line KV events ─────────────────────
+    # WinEventLog UF output is multi-line: each event starts with a date
+    # header like "01/31/2026 11:45:58 PM" then has LogName=..., EventCode=...,
+    # Message=..., etc. on subsequent lines, separated by a blank line.
+    # Without an explicit LINE_BREAKER every line becomes its own Splunk
+    # event. The regex below breaks ONLY at the next event header.
+    "props_overrides": {
+        "LINE_BREAKER": r"([\r\n]+)(?=\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[AP]M)",
+        "TIME_PREFIX": "^",
+        "TIME_FORMAT": "%m/%d/%Y %I:%M:%S %p",
+        "MAX_TIMESTAMP_LOOKAHEAD": 30,
+        "TRUNCATE": 50000,
+    },
+
     "format": {
         "type": "kv",
         "confidence": 0.90,

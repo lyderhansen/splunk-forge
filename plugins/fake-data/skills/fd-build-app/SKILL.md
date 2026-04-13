@@ -464,51 +464,143 @@ from SOURCE_META directly. NOT `FAKE:vendor:product` format.
 
 ### E.4 Write default/props.conf
 
-**CRITICAL: Wildcard stanza MUST be included.** This is what makes Splunk
-accept synthetic timestamps that are far in the past or future:
+## The Magic 6 (hard rule — non-negotiable)
+
+Every `[FAKE:<source_id>]` stanza MUST explicitly set ALL SIX of these
+settings. Inheritance from `[FAKE:*]` is NOT sufficient because different
+generators need different values (especially `LINE_BREAKER` for
+multi-line formats) and silent inheritance has caused catastrophic
+parsing failures in real Splunk installs (yolo_03: 6,789 source events
+exploded into 195,863 indexed events because `LINE_BREAKER` defaulted
+to `([\r\n]+)` on a multi-line KV source).
+
+The six settings:
+
+| # | Setting | Purpose |
+|---|---|---|
+| 1 | `SHOULD_LINEMERGE = false` | Disable legacy line merging — we always control breaking explicitly |
+| 2 | `LINE_BREAKER` | Regex defining where one event ends and the next begins |
+| 3 | `TIME_PREFIX` | Regex anchor for timestamp search (prevents Splunk from grabbing a random date from the message body) |
+| 4 | `TIME_FORMAT` | strptime format for the timestamp |
+| 5 | `MAX_TIMESTAMP_LOOKAHEAD` | How many chars past `TIME_PREFIX` Splunk scans for the timestamp |
+| 6 | `TRUNCATE` | Max event size in bytes |
+
+Before writing any stanza, verify it has all six. Missing any → diagnose
+and fill from the format-defaults table below.
+
+## Wildcard stanza
+
+`[FAKE:*]` only covers the two wide-open timestamp tolerances (so Splunk
+accepts synthetic events far in the past/future) and charset. Put the
+Magic 6 on specific stanzas, NOT the wildcard — the wildcard's single
+`LINE_BREAKER` can never fit both single-line JSON and multi-line
+wineventlog correctly.
 
 ```ini
 [FAKE:*]
 MAX_DAYS_HENCE = 10000
 MAX_DAYS_AGO = 10000
 CHARSET = UTF-8
-LINE_BREAKER = ([\r\n]+)
-SHOULD_LINEMERGE = false
 ```
 
-Then one stanza per generator with format-specific settings:
+## Per-source stanza template
 
 ```ini
 [FAKE:<source_id>]
+# -- Magic 6 --
+SHOULD_LINEMERGE = false
+LINE_BREAKER = <regex>
+TIME_PREFIX = <regex>
+TIME_FORMAT = <strptime>
+MAX_TIMESTAMP_LOOKAHEAD = <int>
+TRUNCATE = <int>
+# -- Format / parsing --
+<KV_MODE / INDEXED_EXTRACTIONS / etc. based on format>
+# -- Indexed-time extraction (Phase E.5 / E.5a) --
 TRANSFORMS-demo_id = extract_demo_id_indexed
+# -- Host + sourcetype routing overrides (Phase E.5a, optional) --
+# TRANSFORMS-host = override_host_<source_id>
+# TRANSFORMS-routing = route_sourcetype_<source_id>
+TZ = UTC
 ```
 
-Append format-specific settings based on the generator's `_serialize()` format:
+## Format-defaults table (fallback when SOURCE_META doesn't override)
 
-| Format | Props Settings |
-|---|---|
-| json | `KV_MODE = json`, `TIME_PREFIX = "timestamp"\s*:\s*"` (or first timestamp field name) |
-| kv | `KV_MODE = auto`, `TIME_PREFIX = timestamp=`, `TIME_FORMAT = %Y-%m-%dT%H:%M:%SZ` |
-| csv | `INDEXED_EXTRACTIONS = csv`, `HEADER_FIELD_LINE_NUMBER = 1` |
-| syslog_bsd | `TIME_FORMAT = %b %d %H:%M:%S` |
-| syslog_rfc5424 | `TIME_FORMAT = %Y-%m-%dT%H:%M:%S.%3NZ`, `TZ = UTC` |
-| cef | `TIME_FORMAT = %b %d %Y %H:%M:%S` |
-| xml | `KV_MODE = xml`, `TIME_PREFIX = <Extended_Timestamp>` (or first timestamp tag), `TIME_FORMAT = %Y-%m-%dT%H:%M:%S.%6NZ`, `TZ = UTC` |
+Fill the Magic 6 from this table based on the generator's `_serialize()`
+format. SOURCE_META overrides (see below) always win.
 
-Read each generator's `_serialize()` method to determine the correct format.
-If the timestamp field name differs from `timestamp`, adjust `TIME_PREFIX`
-accordingly.
+| Format | SHOULD_LINEMERGE | LINE_BREAKER | TIME_PREFIX | TIME_FORMAT | MAX_TIMESTAMP_LOOKAHEAD | TRUNCATE | Extra |
+|---|---|---|---|---|---|---|---|
+| json | `false` | `([\r\n]+)` | `"timestamp"\s*:\s*"` | `%Y-%m-%dT%H:%M:%SZ` | `40` | `10000` | `KV_MODE = json` |
+| kv (single-line) | `false` | `([\r\n]+)` | `timestamp=` | `%Y-%m-%dT%H:%M:%SZ` | `40` | `10000` | `KV_MODE = auto` |
+| kv (multi-line, wineventlog) | `false` | `([\r\n]+)(?=\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s+[AP]M)` | `^` | `%m/%d/%Y %I:%M:%S %p` | `30` | `50000` | `KV_MODE = auto` |
+| csv | `false` | `([\r\n]+)` | — | — | `30` | `10000` | `INDEXED_EXTRACTIONS = csv`, `HEADER_FIELD_LINE_NUMBER = 1` |
+| cef | `false` | `([\r\n]+)(?=CEF:)` | `(?:Jan\|Feb\|Mar\|Apr\|May\|Jun\|Jul\|Aug\|Sep\|Oct\|Nov\|Dec)\s+\d+\s+\d{2}:\d{2}:\d{2}` | `%b %d %H:%M:%S` | `30` | `10000` | |
+| syslog_rfc5424 | `false` | `([\r\n]+)(?=<\d+>)` | `^<\d+>\d+\s+` | `%Y-%m-%dT%H:%M:%S.%3NZ` | `40` | `10000` | |
+| syslog_bsd | `false` | `([\r\n]+)(?=\w{3}\s+\d+\s+\d{2}:\d{2}:\d{2})` | `^` | `%b %d %H:%M:%S` | `30` | `10000` | |
+| xml (single-line per event) | `false` | `([\r\n]+)` | `<Extended_Timestamp>` | `%Y-%m-%dT%H:%M:%S.%6NZ` | `50` | `10000` | `KV_MODE = xml` |
 
-**CRITICAL — ISO-8601 `Z` suffix is a literal, not a strptime token.**
-`%Z` in `TIME_FORMAT` matches *named* timezones like `UTC` or `EST` and
-will NOT match a trailing `Z`. To parse `2026-01-01T00:03:13.275303Z`:
-- End the format with literal `Z` (e.g. `%Y-%m-%dT%H:%M:%S.%6NZ`).
-- Always add `TZ = UTC` so Splunk applies the right offset.
-- Use `%3N` for milliseconds, `%6N` for microseconds. Match the precision
-  the generator actually emits — read `_serialize()` to confirm.
+All stanzas also get `TZ = UTC` unless the timestamp already carries a
+zone token (`%z`).
 
-Never write `%Y-%m-%dT%H:%M:%S.%6N%Z` — it will silently fail to parse and
-Splunk falls back to indexing-time.
+## SOURCE_META overrides
+
+If a generator's `SOURCE_META` dict declares a `props_overrides` key,
+use those values instead of the format-defaults for the matching
+setting. Schema:
+
+```python
+SOURCE_META = {
+    ...,
+    "props_overrides": {
+        "LINE_BREAKER": "([\\r\\n]+)(?=\\d{1,2}/\\d{1,2}/\\d{4})",
+        "TIME_PREFIX": "^",
+        "TIME_FORMAT": "%m/%d/%Y %I:%M:%S %p",
+        "MAX_TIMESTAMP_LOOKAHEAD": 30,
+        "TRUNCATE": 50000,
+        # SHOULD_LINEMERGE is always false — don't list it here
+    },
+}
+```
+
+Presets shipped with the plugin (wineventlog_security, fortigate, etc.)
+that have non-default line-breaking requirements declare their Magic 6
+explicitly in the preset file. fd-add-generator copies these straight
+into SOURCE_META when scaffolding from a preset.
+
+## Enforcement — verify before writing
+
+Before calling Write on `default/props.conf`, assemble a small in-memory
+dict per generator:
+
+```python
+magic6 = {
+    "SHOULD_LINEMERGE": "false",
+    "LINE_BREAKER": <from SOURCE_META.props_overrides or format-defaults>,
+    "TIME_PREFIX": <same resolution order>,
+    "TIME_FORMAT": <same>,
+    "MAX_TIMESTAMP_LOOKAHEAD": <same>,
+    "TRUNCATE": <same>,
+}
+# Fail loud if any are missing or empty:
+for k, v in magic6.items():
+    assert v not in (None, ""), f"{source_id}: Magic 6 setting {k} is unset"
+```
+
+Only then render the stanza. If the assertion fires, stop and tell the
+user exactly which setting is missing — do NOT write a broken props.conf.
+
+## ISO-8601 Z suffix (still critical)
+
+`%Z` in TIME_FORMAT matches named timezones like `UTC` or `EST` and does
+NOT match a trailing literal `Z`. To parse `2026-01-01T00:03:13.275303Z`:
+- End the format with literal `Z` (e.g. `%Y-%m-%dT%H:%M:%S.%6NZ`)
+- Always add `TZ = UTC` so Splunk applies the right offset
+- Use `%3N` for milliseconds, `%6N` for microseconds — match the precision
+  the generator actually emits (read `_serialize()` to confirm)
+
+Never write `%Y-%m-%dT%H:%M:%S.%6N%Z` — it will silently fail to parse
+and Splunk falls back to indexing-time.
 
 ### E.5 Write default/transforms.conf
 

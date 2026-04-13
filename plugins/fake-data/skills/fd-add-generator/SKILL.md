@@ -75,6 +75,7 @@ If it exists:
   - `multi_file` = SPEC["generator_hints"]["multi_file"]
   - `host_field` = SPEC.get("host_field")  # optional, may be None
   - `sourcetype_routing` = SPEC.get("sourcetype_routing")  # optional
+  - `props_overrides` = SPEC.get("props_overrides")  # optional, Magic 6 overrides
 - Proceed directly to **Phase C** (review gate)
 
 If it does not exist: continue to A.4c.
@@ -98,9 +99,13 @@ the file fetch.
 
 If the preset file exists:
 - Read it and extract the `PRESET` dict
-- Treat it identically to a SPEC: build Findings from the same keys
-  (`source`, `format`, `category`, `fields`, `sample_events`,
-  `generator_hints`, `multi_file`)
+- Treat it identically to a SPEC: build Findings from the same keys:
+  - Required: `source`, `format`, `category`, `fields`, `sample_events`,
+    `generator_hints`, `multi_file`
+  - Optional (copy through to Findings if present):
+    - `host_field` = PRESET.get("host_field")
+    - `sourcetype_routing` = PRESET.get("sourcetype_routing")
+    - `props_overrides` = PRESET.get("props_overrides")  # Magic 6 overrides
 - Print: `"Using bundled preset <source_id> (no research needed)."`
 - **Skip Phase B entirely** — proceed directly to Phase C (review gate)
 
@@ -443,9 +448,28 @@ If `Findings.sourcetype_routing` is set:
     },
 ```
 
-These two keys are read by fd-build-app to write `transforms.conf` stanzas
+If `Findings.props_overrides` is set (Magic 6 overrides for props.conf):
+```python
+    "props_overrides": {
+        "LINE_BREAKER": r"<regex>",
+        "TIME_PREFIX": "<regex>",
+        "TIME_FORMAT": "<strptime>",
+        "MAX_TIMESTAMP_LOOKAHEAD": <int>,
+        "TRUNCATE": <int>,
+    },
+```
+
+Copy each key verbatim from Findings — don't omit keys that are set.
+fd-build-app reads `props_overrides` during Phase E.4 to fill the Magic 6
+on the `[FAKE:<source_id>]` stanza. Without this, fd-build-app falls
+back to the format-defaults table, which is correct for single-line
+formats but wrong for multi-line ones (WinEventLog, multi-line stack
+traces, Oracle alert.log, etc.).
+
+These keys are read by fd-build-app to write `transforms.conf` stanzas
 that override Splunk's default host (from forwarder hostname → in-event
-field) and split one log stream into multiple sourcetypes.
+field) and split one log stream into multiple sourcetypes, and to ensure
+props.conf parses the log correctly without breaking on every newline.
 
 **Generator function:** Use the exact signature:
 ```python
