@@ -50,6 +50,39 @@ cd ~/.claude/plugins/marketplaces/lyder && git pull
 # Then in Claude Code: /reload-plugins
 ```
 
+### Option 2b — From a downloaded ZIP file
+
+If you don't have git installed, or you got the plugin as a ZIP file (e.g.
+GitHub's "Download ZIP" button), you can install manually:
+
+```bash
+# 1. Download the ZIP from GitHub
+#    Go to: https://github.com/lyderhansen/fake-data
+#    Click: Code → Download ZIP
+#    Save to: ~/Downloads/fake-data-main.zip
+
+# 2. Remove any old version of the marketplace
+rm -rf ~/.claude/plugins/marketplaces/lyder
+
+# 3. Unzip and rename
+unzip ~/Downloads/fake-data-main.zip -d ~/Downloads/
+mv ~/Downloads/fake-data-main ~/.claude/plugins/marketplaces/lyder
+
+# 4. Verify the structure
+ls ~/.claude/plugins/marketplaces/lyder/.claude-plugin/marketplace.json
+ls ~/.claude/plugins/marketplaces/lyder/plugins/fake-data/.claude-plugin/plugin.json
+# Both files should exist
+
+# 5. In Claude Code:
+#    /plugin → Marketplaces → Add Marketplace → ~/.claude/plugins/marketplaces/lyder
+#    /plugin → Discover → fake-data → Install for you
+#    Restart Claude Code or run /reload-plugins
+```
+
+**Important:** The folder MUST be renamed from `fake-data-main` (the GitHub ZIP default) to `lyder`. The folder name is what Claude Code uses to identify the marketplace.
+
+**Updating later:** Repeat steps 1-4 with a fresh ZIP, then run `/reload-plugins` in Claude Code. (Or just use `git clone` from Option 2 — much easier for repeat updates.)
+
 ### Option 3 — Development mode (--plugin-dir)
 
 If you're actively developing the plugin, skip the marketplace dance entirely and load it directly:
