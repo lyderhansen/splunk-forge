@@ -11,12 +11,12 @@ FAKE_DATA helps you build a fictional world (organization, locations, users, inf
 
 **Option 1 — Clone into Claude Code plugins directory:**
 ```bash
-git clone https://github.com/lyderhansen/fake-data.git ~/.claude/plugins/fake-data
+git clone https://github.com/lyderhansen/splunk-forge.git ~/.claude/plugins/fake-data
 ```
 
 **Option 2 — Symlink (for development):**
 ```bash
-git clone https://github.com/lyderhansen/fake-data.git ~/code/fake-data
+git clone https://github.com/lyderhansen/splunk-forge.git ~/code/fake-data
 ln -s ~/code/fake-data ~/.claude/plugins/fake-data
 ```
 

@@ -17,7 +17,7 @@ If you have access to the GitHub repo, install directly from the URL:
 
 1. In Claude Code, run `/plugin`
 2. Go to the **Marketplaces** tab → **Add Marketplace**
-3. Paste: `lyderhansen/fake-data` (or full URL: `https://github.com/lyderhansen/fake-data`)
+3. Paste: `lyderhansen/splunk-forge` (or full URL: `https://github.com/lyderhansen/splunk-forge`)
 4. Press Enter — Claude Code clones the marketplace
 5. Go to the **Discover** tab → search "fake-data" → Install
 6. Restart Claude Code (or run `/reload-plugins`)
@@ -28,7 +28,7 @@ If the repo is private or you have a local clone:
 
 ```bash
 # 1. Clone (or pull latest) into the marketplaces directory
-git clone https://github.com/lyderhansen/fake-data.git \
+git clone https://github.com/lyderhansen/splunk-forge.git \
           ~/.claude/plugins/marketplaces/splunk-forge
 
 # OR if you already have a local copy elsewhere, symlink it:
@@ -57,7 +57,7 @@ GitHub's "Download ZIP" button), you can install manually:
 
 ```bash
 # 1. Download the ZIP from GitHub
-#    Go to: https://github.com/lyderhansen/fake-data
+#    Go to: https://github.com/lyderhansen/splunk-forge
 #    Click: Code → Download ZIP
 #    Save to: ~/Downloads/fake-data-main.zip
 

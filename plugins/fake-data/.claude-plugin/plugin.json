@@ -1,10 +1,12 @@
 {
   "name": "fake-data",
   "description": "FAKE_DATA — A-to-Z Claude Code plugin for generating synthetic Splunk data. Research log formats, scaffold generators, produce realistic events from a user-defined fictional world.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": {
-    "name": "lyder"
+    "name": "Lyder Hansen"
   },
+  "homepage": "https://github.com/lyderhansen/splunk-forge",
+  "repository": "https://github.com/lyderhansen/splunk-forge",
   "license": "MIT",
   "keywords": [
     "splunk",
@@ -12,6 +14,7 @@
     "log-generation",
     "demo-data",
     "fake-data",
+    "cim",
     "skills"
   ]
 }

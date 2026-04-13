@@ -11,7 +11,7 @@
       "description": "FAKE_DATA — A-to-Z Claude Code plugin for generating synthetic Splunk log data. 8 skills for the full pipeline: workspace creation, log format discovery, generator scaffolding, scenario authoring, CIM mapping, log generation, and Splunk TA packaging.",
       "source": "./plugins/fake-data",
       "category": "productivity",
-      "homepage": "https://github.com/lyderhansen/fake-data",
+      "homepage": "https://github.com/lyderhansen/splunk-forge",
       "author": {
         "name": "Lyder Hansen"
       }
