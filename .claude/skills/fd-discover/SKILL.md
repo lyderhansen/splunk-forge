@@ -487,7 +487,49 @@ Artifacts written to fake_data/discover/<source_id>/:
   - research.json  (audit trail)
 ```
 
-### F.3 Chain to fd-add-generator
+### F.3 Offer to save as preset
+
+**Only offer this if Phase A.5 did NOT find a bundled preset AND
+`overall_confidence >= 0.8`.** We don't want to save low-quality research
+as a preset.
+
+Check: `../../../presets/<source_id>.py` exists? If yes, skip this step.
+
+If no (fresh research) AND confidence is high enough, ask:
+
+> "This research produced a high-confidence SPEC.py (<overall_confidence>).
+> Want to save it as a bundled preset so future runs of `/fd-discover
+> <source_id>` skip research entirely?
+>
+>   1. **yes** — Save to `presets/<source_id>.py` (in the plugin repo).
+>      Future runs of /fd-discover will find it instantly.
+>   2. **skip** — Keep it local to this workspace only
+> [1]"
+
+If **yes**:
+
+1. Read the generated `fake_data/discover/<source_id>/SPEC.py`
+2. Copy the content to `../../../presets/<source_id>.py` (relative to this SKILL.md — i.e. the plugin repo's presets/ directory)
+3. Replace `SPEC = {` with `PRESET = {` in the copied file
+4. Replace the docstring at the top:
+   ```python
+   """Bundled preset for <source_id>. Generated from /fd-discover research.
+   Used when --preset is selected or when no --sample/--doc is provided."""
+   ```
+5. Update `research_metadata.research_mode` to `"preset"` in the copied file
+6. Print:
+   ```
+   Saved preset: presets/<source_id>.py
+   This preset is now available in the plugin repo. To share it with
+   others, commit it and push:
+     git add presets/<source_id>.py
+     git commit -m "Add preset for <source_id>"
+     git push
+   ```
+
+If **skip**: continue to F.4.
+
+### F.4 Chain to fd-add-generator
 
 Ask the user:
 
