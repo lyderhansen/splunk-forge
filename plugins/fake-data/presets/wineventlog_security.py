@@ -16,6 +16,16 @@ PRESET = {
     "category": "windows",
     "source_groups": ["windows", "endpoint"],
 
+    # ─── Indexed-time field overrides (consumed by fd-build-app) ────────
+    # ComputerName carries the real host inside each event — overrides
+    # the default Splunk host (forwarder hostname). LogName splits one
+    # log stream into FAKE:WinEventLog:System / Application / Security.
+    "host_field": "ComputerName",
+    "sourcetype_routing": {
+        "field": "LogName",
+        "template": "FAKE:WinEventLog:{value}",
+    },
+
     "format": {
         "type": "kv",
         "confidence": 0.90,

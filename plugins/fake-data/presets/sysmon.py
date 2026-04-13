@@ -16,6 +16,9 @@ PRESET = {
     "category": "windows",
     "source_groups": ["windows", "endpoint"],
 
+    # Sysmon emits ComputerName per event — override the forwarder host.
+    "host_field": "ComputerName",
+
     "format": {
         "type": "kv",
         "confidence": 0.90,

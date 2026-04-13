@@ -31,12 +31,32 @@ from fake_data.time_utils import ts_iso, calc_natural_events, date_add
 
 SOURCE_META = {
     "source_id": "TEMPLATE",
-    "category": "unknown",
-    "source_groups": ["unknown"],
+    # category MUST be one of: network, cloud, windows, linux, web, retail,
+    # collaboration, itsm, erp, ot, database. Never "unknown".
+    "category": "network",
+    "source_groups": ["network"],
     "volume_category": "firewall",
     "multi_file": False,
     "depends_on": [],
     "description": "Template generator — replace with your source description",
+
+    # ─── OPTIONAL: indexed-time field overrides ──────────────────────────
+    # Read by fd-build-app to write transforms.conf stanzas. Leave unset
+    # if the source has no in-event host or no per-event sourcetype split.
+
+    # Override Splunk's default host (forwarder hostname) with a value
+    # from inside the event. The regex must capture exactly one group.
+    # Example: "ComputerName=(\\S+)" for WinEventLog
+    # "host_field": None,        # field name shorthand, e.g. "ComputerName"
+    # "host_regex": None,        # explicit regex override (takes precedence)
+
+    # Route to multiple sourcetypes based on a field value inside the
+    # event. Example: WinEventLog:System / Application / Security all
+    # share one log format, distinguished by the LogName= field.
+    # "sourcetype_routing": {
+    #     "field": "LogName",
+    #     "template": "FAKE:WinEventLog:{value}",  # {value} is replaced at index time
+    # },
 }
 
 

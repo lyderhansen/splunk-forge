@@ -530,6 +530,138 @@ The regex handles both JSON format (`"demo_id": "value"`) and KV format
 (`demo_id=value`). The `WRITE_META = true` directive writes the extracted
 value as indexed metadata.
 
+### E.5a Indexed-time field overrides (host + sourcetype routing)
+
+Read each generator's `SOURCE_META` dict and check for two optional keys:
+`host_field` (or `host_regex`) and `sourcetype_routing`. These let Splunk
+override the default host (forwarder hostname) with a value from inside
+the event, and split one log stream into multiple sourcetypes based on
+event content.
+
+This step **appends** stanzas to `default/transforms.conf` and **appends**
+TRANSFORMS- keys to the matching `[FAKE:<source_id>]` stanza in
+`default/props.conf`. Skip a generator entirely if neither optional key
+is set.
+
+#### Host override
+
+For each generator with `SOURCE_META["host_field"]` (or `host_regex`):
+
+**If `host_regex` is set**, use it verbatim. **If only `host_field` is set**,
+build a default regex based on the generator's format:
+
+| Format | Default host regex from host_field |
+|---|---|
+| json | `"<host_field>"\s*:\s*"([^"]+)"` |
+| kv | `<host_field>=(\S+)` |
+| cef | `<host_field>=([^\s\|]+)` |
+| syslog_bsd | `<host_field>=(\S+)` |
+| syslog_rfc5424 | `<host_field>=(\S+)` |
+| xml | `<<host_field>>([^<]+)</<host_field>>` |
+| csv | (skip — host should be a column, use INDEXED_EXTRACTIONS) |
+
+Append to `default/transforms.conf`:
+
+```ini
+[override_host_<source_id>]
+REGEX = <regex>
+FORMAT = host::$1
+DEST_KEY = MetaData:Host
+```
+
+Append `TRANSFORMS-host = override_host_<source_id>` to the
+`[FAKE:<source_id>]` stanza in `default/props.conf`. If a TRANSFORMS-demo_id
+line already exists, add a SECOND TRANSFORMS- line — they coexist:
+
+```ini
+[FAKE:<source_id>]
+TRANSFORMS-demo_id = extract_demo_id_indexed
+TRANSFORMS-host = override_host_<source_id>
+```
+
+#### Sourcetype routing
+
+For each generator with `SOURCE_META["sourcetype_routing"]`:
+
+```python
+routing = SOURCE_META["sourcetype_routing"]
+# routing == {"field": "LogName", "template": "FAKE:WinEventLog:{value}"}
+```
+
+Build the regex from format (same table as host override above) using
+`routing["field"]`. The capture group becomes `$1`. Render `routing["template"]`
+by replacing the literal `{value}` with `$1`:
+
+```python
+format_str = routing["template"].replace("{value}", "$1")
+# format_str == "FAKE:WinEventLog:$1"
+```
+
+Append to `default/transforms.conf`:
+
+```ini
+[route_sourcetype_<source_id>]
+REGEX = <regex on routing.field>
+FORMAT = <rendered format_str>
+DEST_KEY = MetaData:Sourcetype
+```
+
+Append to the props stanza:
+
+```ini
+[FAKE:<source_id>]
+TRANSFORMS-demo_id = extract_demo_id_indexed
+TRANSFORMS-routing = route_sourcetype_<source_id>
+```
+
+**Concrete example — WinEventLog (KV format, LogName routing,
+ComputerName host override):**
+
+```ini
+# props.conf
+[FAKE:wineventlog]
+TRANSFORMS-demo_id = extract_demo_id_indexed
+TRANSFORMS-host = override_host_wineventlog
+TRANSFORMS-routing = route_sourcetype_wineventlog
+KV_MODE = auto
+TIME_PREFIX = TimeCreated=
+TIME_FORMAT = %Y-%m-%dT%H:%M:%SZ
+
+# transforms.conf
+[override_host_wineventlog]
+REGEX = ComputerName=(\S+)
+FORMAT = host::$1
+DEST_KEY = MetaData:Host
+
+[route_sourcetype_wineventlog]
+REGEX = LogName=(\S+)
+FORMAT = FAKE:WinEventLog:$1
+DEST_KEY = MetaData:Sourcetype
+```
+
+After Splunk indexes a WinEventLog event with `LogName=Security` and
+`ComputerName=BOS-WS-SWILSON01`, the search `host=BOS-WS-SWILSON01
+sourcetype=FAKE:WinEventLog:Security` finds it.
+
+#### Defaults from the category table
+
+If a generator does NOT explicitly declare `host_field` in SOURCE_META,
+fd-build-app may STILL apply a sensible default based on category. Use
+this fallback table (only when the generator's field list contains a
+matching field name):
+
+| Category | Default host_field if not set |
+|---|---|
+| windows | ComputerName (if present in fields) |
+| network (fortigate) | devname (if present) |
+| network (palo) | dvc (if present) |
+| linux | hostname (if present) |
+| database (oracle) | Userhost (if present) |
+
+Apply the fallback silently. If neither SOURCE_META nor the fallback
+match a real field in the generator, skip host override entirely (the
+default Splunk host will be used).
+
 ### E.6 Write default/fields.conf
 
 ```ini

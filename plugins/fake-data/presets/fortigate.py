@@ -16,6 +16,9 @@ PRESET = {
     "category": "network",
     "source_groups": ["network"],
 
+    # Fortigate carries the device name in devname= per event.
+    "host_field": "devname",
+
     "format": {
         "type": "kv",
         "confidence": 0.85,

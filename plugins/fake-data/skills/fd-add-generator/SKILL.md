@@ -73,6 +73,8 @@ If it exists:
   - `sample_events` = SPEC["sample_events"]
   - `description` = SPEC["source"]["description"]
   - `multi_file` = SPEC["generator_hints"]["multi_file"]
+  - `host_field` = SPEC.get("host_field")  # optional, may be None
+  - `sourcetype_routing` = SPEC.get("sourcetype_routing")  # optional
 - Proceed directly to **Phase C** (review gate)
 
 If it does not exist: continue to A.4c.
@@ -232,13 +234,64 @@ something not in that list, re-ask.
 
 Pick the first 2-3 non-empty, non-header lines from the sample file. These will be included as docstring examples in the generated file.
 
-### B.sample.8 Build Findings
+### B.sample.8 Host field detection
+
+Many sources carry the real host inside the event itself (Splunk's default
+`host` would otherwise be the forwarder hostname, which is meaningless for
+synthetic data). Detect this from the field list using the table below:
+
+| Category | Field name patterns | host_field value |
+|---|---|---|
+| windows | ComputerName, Computer, Hostname | first match |
+| network (fortigate) | devname, device_name | first match |
+| network (cisco) | host, hostname | first match |
+| network (palo) | dvc, device_name, hostname | first match |
+| linux | hostname, host, _syslog_host | first match |
+| database (oracle) | Userhost, db_host | first match |
+| database (mssql/postgres) | servername, host_name | first match |
+| cloud (aws) | recipientAccountId, sourceIPAddress | (skip — cloud is multi-tenant) |
+| web | server_name, host | first match |
+| ot | device_id, plc_id | first match |
+
+If a matching field is found, set `host_field` on Findings to that field
+name. The generator will still emit the field normally — fd-build-app uses
+it to write a transforms.conf stanza that overrides Splunk's default host.
+
+If no match: leave `host_field` unset. The default Splunk host (forwarder
+hostname) will be used.
+
+### B.sample.9 Sourcetype routing detection
+
+Some sources share one log format but should split into multiple sourcetypes
+based on a value inside the event. The canonical example is WinEventLog:
+System / Application / Security all have identical KV format but should be
+indexed as `FAKE:WinEventLog:System`, `:Application`, `:Security` so Splunk
+searches like `sourcetype=WinEventLog:Security` work.
+
+Detect routing candidates from the field list:
+
+| Category | Field that splits sourcetype | Template |
+|---|---|---|
+| windows + WinEventLog-shaped (has LogName field) | LogName | `FAKE:WinEventLog:{value}` |
+| network + multi-vsys (Palo/Fortinet) | vsys | `FAKE:<source_id>:{value}` |
+| cloud + multi-region | region | (skip — usually overkill) |
+
+If detected, set `sourcetype_routing = {"field": "<field>", "template": "<template>"}`
+on Findings. Otherwise leave unset.
+
+### B.sample.10 Build Findings
 
 Assemble a `Findings` object (mental model — not a file) with:
 - `source_id`, `format`, `category`, `volume_category`, `multi_file: False`
 - `fields`: list of `{name, type, required, example}`
 - `sample_events`: 2-3 raw lines
 - `description`: auto-generated from source_id and format, e.g. "FortiGate KV-format traffic logs"
+- `host_field`: from B.sample.8 (or `None`)
+- `sourcetype_routing`: from B.sample.9 (or `None`)
+
+These last two flow into SOURCE_META and are read by fd-build-app to write
+indexed-time `transforms.conf` overrides. They are optional — leave unset
+when the source has no in-event host or no per-event sourcetype split.
 
 Proceed to Phase C.
 
@@ -372,6 +425,27 @@ SOURCE_META = {
     "description": "<description>",
 }
 ```
+
+**Append optional indexed-time override keys ONLY if Findings set them.**
+Do not include the keys at all if they're `None` — fd-build-app treats
+absence and `None` the same way.
+
+If `Findings.host_field` is set:
+```python
+    "host_field": "<host_field_name>",
+```
+
+If `Findings.sourcetype_routing` is set:
+```python
+    "sourcetype_routing": {
+        "field": "<routing_field>",
+        "template": "<template_with_{value}>",
+    },
+```
+
+These two keys are read by fd-build-app to write `transforms.conf` stanzas
+that override Splunk's default host (from forwarder hostname → in-event
+field) and split one log stream into multiple sourcetypes.
 
 **Generator function:** Use the exact signature:
 ```python
