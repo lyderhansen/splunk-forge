@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "lyder",
-  "description": "Lyder Hansen's Claude Code plugins. Currently hosts the fake-data plugin for synthetic Splunk log generation.",
+  "name": "lyders-splunk-tools",
+  "description": "Lyder Hansen's Claude Code plugins for Splunk. Currently hosts fake-data for synthetic log generation. More Splunk-related plugins coming.",
   "owner": {
     "name": "Lyder Hansen"
   },
