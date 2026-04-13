@@ -147,7 +147,7 @@ Accept "auto" for the default distribution, or let the user specify counts
 **Generate users deterministically:**
 
 1. **Load name data** from the plugin repo using the Read tool:
-   `../../../data/names_sample.py` (relative to this SKILL.md)
+   `../../data/names_sample.py` (relative to this SKILL.md)
    Extract `FIRST_NAMES` and `LAST_NAMES` lists.
 
 2. **Collect existing usernames** from the current USERS list to avoid duplicates.
@@ -221,7 +221,7 @@ Validate: 2-letter ISO code.
 **Auto-generate external IP pool entries:**
 
 1. Load country IP ranges from the plugin repo using the Read tool:
-   `../../../data/country_ip_ranges.py` (relative to this SKILL.md)
+   `../../data/country_ip_ranges.py` (relative to this SKILL.md)
 2. Look up the country code in `COUNTRY_RANGES`.
 3. Add those ranges to `EXTERNAL_IP_POOL` (if not already present).
 4. Add an entry to `EXTERNAL_IP_POOL_BY_COUNTRY` for the new country (if not

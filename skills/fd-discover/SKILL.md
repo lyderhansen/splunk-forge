@@ -86,7 +86,7 @@ If `--sample=<path>` given:
 
 Before doing any research, check if a bundled preset exists in the plugin repo.
 
-Read (using the Read tool): `../../../presets/<source_id>.py` (relative to this SKILL.md)
+Read (using the Read tool): `../../presets/<source_id>.py` (relative to this SKILL.md)
 
 **If file exists:**
 - Parse it — it contains a `PRESET` dict with the same shape as SPEC
@@ -493,7 +493,7 @@ Artifacts written to fake_data/discover/<source_id>/:
 `overall_confidence >= 0.8`.** We don't want to save low-quality research
 as a preset.
 
-Check: `../../../presets/<source_id>.py` exists? If yes, skip this step.
+Check: `../../presets/<source_id>.py` exists? If yes, skip this step.
 
 If no (fresh research) AND confidence is high enough, ask:
 
@@ -509,7 +509,7 @@ If no (fresh research) AND confidence is high enough, ask:
 If **yes**:
 
 1. Read the generated `fake_data/discover/<source_id>/SPEC.py`
-2. Copy the content to `../../../presets/<source_id>.py` (relative to this SKILL.md — i.e. the plugin repo's presets/ directory)
+2. Copy the content to `../../presets/<source_id>.py` (relative to this SKILL.md — i.e. the plugin repo's presets/ directory)
 3. Replace `SPEC = {` with `PRESET = {` in the copied file
 4. Replace the docstring at the top:
    ```python

@@ -299,8 +299,8 @@ Build all file contents before writing anything. Do NOT write files yet.
 ### C.1 Load data files from plugin repo
 
 Read these files using the Read tool (paths relative to this SKILL.md):
-- `../../../data/names_sample.py` — extract `FIRST_NAMES` and `LAST_NAMES` lists
-- `../../../data/country_ip_ranges.py` — extract `COUNTRY_RANGES` and `FALLBACK_RANGES`
+- `../../data/names_sample.py` — extract `FIRST_NAMES` and `LAST_NAMES` lists
+- `../../data/country_ip_ranges.py` — extract `COUNTRY_RANGES` and `FALLBACK_RANGES`
 
 ### C.2 Generate deterministic values
 
@@ -491,13 +491,13 @@ Use the **Write tool** for every file. Do NOT use Bash echo/cat/heredoc.
 ### E.1 Read template files from plugin repo
 
 Read these files using the Read tool (relative to this SKILL.md):
-- `../../../templates/runtime/config.py`
-- `../../../templates/runtime/time_utils.py`
-- `../../../templates/runtime/main_generate.py`
-- `../../../templates/runtime/tui_generate.py`
-- `../../../templates/generators/_template_generator.py`
-- `../../../templates/scenarios/_base.py`
-- `../../../templates/scenarios/__init__.py`
+- `../../templates/runtime/config.py`
+- `../../templates/runtime/time_utils.py`
+- `../../templates/runtime/main_generate.py`
+- `../../templates/runtime/tui_generate.py`
+- `../../templates/generators/_template_generator.py`
+- `../../templates/scenarios/_base.py`
+- `../../templates/scenarios/__init__.py`
 
 ### E.2 Write all files
 

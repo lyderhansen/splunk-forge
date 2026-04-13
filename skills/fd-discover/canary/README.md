@@ -7,7 +7,7 @@
 ## Canary 1: Offline sample (structural assertions)
 
 ```
-/fd-discover test_kv --sample=.claude/skills/fd-discover/canary/test_kv_sample.log --no-search
+/fd-discover test_kv --sample=skills/fd-discover/canary/test_kv_sample.log --no-search
 ```
 
 Pass criteria:
@@ -35,7 +35,7 @@ Pass criteria:
 ## Canary 3: Offline unknown source
 
 ```
-/fd-discover custom_thing --sample=.claude/skills/fd-discover/canary/test_kv_sample.log --no-search
+/fd-discover custom_thing --sample=skills/fd-discover/canary/test_kv_sample.log --no-search
 ```
 
 Pass criteria:

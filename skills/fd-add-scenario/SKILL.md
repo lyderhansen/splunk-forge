@@ -272,12 +272,12 @@ If `fake_data/scenarios/_base.py` does NOT exist (noted in A.6):
    ```
 
 3. Read `_base.py` from the plugin repo using the Read tool:
-   `../../../templates/scenarios/_base.py` (relative to this SKILL.md)
+   `../../templates/scenarios/_base.py` (relative to this SKILL.md)
    Write it to `fake_data/scenarios/_base.py`.
 
 4. Update `fake_data/config.py` -- read the current user config.py, then
    read the updated template from the plugin repo:
-   `../../../templates/runtime/config.py` (relative to this SKILL.md)
+   `../../templates/runtime/config.py` (relative to this SKILL.md)
    Copy the `discover_scenarios()` and `expand_scenarios()` functions from
    the template into the user's `fake_data/config.py`, replacing the old
    placeholder implementation. Preserve all other content in the user's

@@ -276,7 +276,7 @@ Create this generator? [yes/edit/cancel]
 ### D.1 Read the template
 
 Read the generator template from the plugin repo using the Read tool:
-`../../../templates/generators/_template_generator.py`
+`../../templates/generators/_template_generator.py`
 
 ### D.2 Generate the new file content
 

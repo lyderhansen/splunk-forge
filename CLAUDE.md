@@ -30,24 +30,23 @@ All meaningful changes MUST be documented in `CHANGEHISTORY.md`, newest first, w
 fake-data/
 ├── .claude-plugin/
 │   └── plugin.json              # plugin manifest
-├── .claude/
-│   └── skills/
-│       ├── fd-init/             # ✅ X1 — workspace creation wizard
-│       │   └── SKILL.md
-│       ├── fd-add-generator/    # ✅ X1 — generator scaffolding (sample + wizard)
-│       │   └── SKILL.md
-│       ├── fd-discover/         # ✅ X2 — log format discovery with research
-│       │   └── SKILL.md
-│       ├── fd-add-scenario/     # ✅ X3 — scenario creation with research
-│       │   └── SKILL.md
-│       ├── fd-world/            # ✅ X4 — interactive world.py CRUD
-│       │   └── SKILL.md
-│       ├── fd-generate/         # ✅ X5 — guided generation wizard
-│       │   └── SKILL.md
-│       ├── fd-cim/              # ✅ X7 — CIM field mapping
-│       │   └── SKILL.md
-│       └── fd-build-app/        # ✅ X6 — Splunk TA generation
-│           └── SKILL.md
+├── skills/                      # Claude Code plugin skills (root-level, not under .claude/)
+│   ├── fd-init/                 # ✅ X1 — workspace creation wizard
+│   │   └── SKILL.md
+│   ├── fd-add-generator/        # ✅ X1 — generator scaffolding
+│   │   └── SKILL.md
+│   ├── fd-discover/             # ✅ X2 — log format discovery with research
+│   │   └── SKILL.md
+│   ├── fd-add-scenario/         # ✅ X3 — scenario creation with research
+│   │   └── SKILL.md
+│   ├── fd-world/                # ✅ X4 — interactive world.py CRUD
+│   │   └── SKILL.md
+│   ├── fd-generate/             # ✅ X5 — guided generation wizard
+│   │   └── SKILL.md
+│   ├── fd-cim/                  # ✅ X7 — CIM field mapping
+│   │   └── SKILL.md
+│   └── fd-build-app/            # ✅ X6 — Splunk TA generation
+│       └── SKILL.md
 ├── templates/
 │   ├── runtime/                 # Python files copied into user repo by init
 │   │   ├── config.py            # ✅ defaults, volume params, output paths
