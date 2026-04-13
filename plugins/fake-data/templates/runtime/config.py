@@ -25,20 +25,26 @@ DEFAULT_SCALE = 1.0
 
 OUTPUT_BASE = Path(__file__).resolve().parent / "output"
 
-OUTPUT_DIRS = {
-    "network": OUTPUT_BASE / "network",
-    "cloud": OUTPUT_BASE / "cloud",
-    "windows": OUTPUT_BASE / "windows",
-    "linux": OUTPUT_BASE / "linux",
-    "web": OUTPUT_BASE / "web",
-    "retail": OUTPUT_BASE / "retail",
-    "collaboration": OUTPUT_BASE / "collaboration",
-    "itsm": OUTPUT_BASE / "itsm",
-    "erp": OUTPUT_BASE / "erp",
-    "ot": OUTPUT_BASE / "ot",
-    "database": OUTPUT_BASE / "database",
-    "unknown": OUTPUT_BASE / "unknown",
-}
+VALID_CATEGORIES = (
+    "network",
+    "cloud",
+    "windows",
+    "linux",
+    "web",
+    "retail",
+    "collaboration",
+    "itsm",
+    "erp",
+    "ot",
+    "database",
+)
+
+
+def _build_output_dirs(base: Path) -> dict:
+    return {cat: base / cat for cat in VALID_CATEGORIES}
+
+
+OUTPUT_DIRS = _build_output_dirs(OUTPUT_BASE)
 
 
 def get_output_path(category: str, filename: str) -> Path:
@@ -47,34 +53,26 @@ def get_output_path(category: str, filename: str) -> Path:
     Supports nested subdirectories in filename, e.g.:
         get_output_path("cloud", "webex/webex_events.json")
         -> output/cloud/webex/webex_events.json
+
+    Raises ValueError if category is not in VALID_CATEGORIES — generators
+    must declare a real category, never "unknown".
     """
-    base = OUTPUT_DIRS.get(category, OUTPUT_BASE)
+    if category not in OUTPUT_DIRS:
+        raise ValueError(
+            f"Unknown output category {category!r}. "
+            f"Valid categories: {', '.join(VALID_CATEGORIES)}"
+        )
+    base = OUTPUT_DIRS[category]
     full_path = base / filename
     full_path.parent.mkdir(parents=True, exist_ok=True)
     return full_path
 
 
 def set_output_base(new_base: Path):
-    """Redirect all generator output to a different base directory.
-
-    Reserved for future test/production staging. In X1, all output goes
-    to fake_data/output/ directly.
-    """
+    """Redirect all generator output to a different base directory."""
     global OUTPUT_BASE, OUTPUT_DIRS
     OUTPUT_BASE = new_base
-    OUTPUT_DIRS = {
-        "network": OUTPUT_BASE / "network",
-        "cloud": OUTPUT_BASE / "cloud",
-        "windows": OUTPUT_BASE / "windows",
-        "linux": OUTPUT_BASE / "linux",
-        "web": OUTPUT_BASE / "web",
-        "retail": OUTPUT_BASE / "retail",
-        "collaboration": OUTPUT_BASE / "collaboration",
-        "itsm": OUTPUT_BASE / "itsm",
-        "erp": OUTPUT_BASE / "erp",
-        "ot": OUTPUT_BASE / "ot",
-        "unknown": OUTPUT_BASE / "unknown",
-    }
+    OUTPUT_DIRS = _build_output_dirs(OUTPUT_BASE)
 
 
 # =============================================================================

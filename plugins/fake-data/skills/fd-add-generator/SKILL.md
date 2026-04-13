@@ -75,12 +75,61 @@ If it exists:
   - `multi_file` = SPEC["generator_hints"]["multi_file"]
 - Proceed directly to **Phase C** (review gate)
 
-If it does not exist: continue to A.5.
+If it does not exist: continue to A.4c.
 
-### A.5 Decide mode
+### A.4c Check for bundled preset
+
+Bundled presets in the plugin's `presets/` directory cover the most common
+sources (fortigate, wineventlog_security, aws_cloudtrail, etc.). They have
+the same structure as a SPEC.py and let us skip both wizard and research.
+
+Resolve the plugin presets path. From this SKILL.md it is `../../presets/`.
+The skill's runtime location depends on installation, so try:
+
+```
+<plugin_root>/presets/<source_id>.py
+```
+
+where `<plugin_root>` is two directories above this SKILL.md, OR locate via
+`fd-discover`'s known plugin path if available. Use the Read tool to attempt
+the file fetch.
+
+If the preset file exists:
+- Read it and extract the `PRESET` dict
+- Treat it identically to a SPEC: build Findings from the same keys
+  (`source`, `format`, `category`, `fields`, `sample_events`,
+  `generator_hints`, `multi_file`)
+- Print: `"Using bundled preset <source_id> (no research needed)."`
+- **Skip Phase B entirely** — proceed directly to Phase C (review gate)
+
+If no preset file exists: continue to A.4d.
+
+### A.4d Auto-invoke fd-discover when no SPEC, no preset, no sample
+
+If A.4b (SPEC), A.4c (preset), AND `--sample=<path>` all came up empty,
+**do not drop into wizard mode and start guessing**. The wizard path produces
+hallucinated field lists for sources the agent has never actually seen.
+
+Instead, auto-invoke `/fd-discover <source_id> --auto`:
+
+1. Print: `"No SPEC, preset, or sample for <source_id>. Researching the format first via /fd-discover..."`
+2. Invoke the `fd-discover` skill with `<source_id> --auto` as the argument.
+   This dispatches the research subagent and writes
+   `fake_data/discover/<source_id>/SPEC.py` on success.
+3. After fd-discover returns, re-check A.4b. If a SPEC.py now exists, load
+   it as in A.4b and proceed to Phase C.
+4. If fd-discover returns but did not write a SPEC.py (research failed or
+   was aborted), fall through to A.5 with an explicit warning:
+   `"⚠️ fd-discover did not produce a SPEC. Falling back to wizard mode — quality may be low."`
+
+This makes wizard mode the **last resort** rather than the default.
+
+### A.5 Decide mode (last-resort fallback)
 
 If `--sample=<path>` is provided: **sample mode** (Phase B.sample).
-Otherwise: **wizard mode** (Phase B.wizard).
+Otherwise (no SPEC after auto-discover, no preset, no sample): **wizard mode**
+(Phase B.wizard). Wizard mode should only be reached when fd-discover
+explicitly failed — never as the default path for an unknown source.
 
 ---
 
@@ -146,19 +195,25 @@ Check if any of these tokens appear in `source_id` (first match wins):
 
 | Token(s) in source_id | Category |
 |---|---|
-| firewall, asa, fortinet, palo, cisco_asa, meraki, catalyst | network |
-| aws, gcp, azure, entra, okta | cloud |
-| wineventlog, sysmon, perfmon, mssql | windows |
-| linux, syslog | linux |
-| access, apache, nginx, web | web |
-| exchange, office, webex, teams | collaboration |
-| sap, erp | erp |
-| servicenow, itsm | itsm |
-| cybervision, plc, scada, ot | ot |
-| (no match) | unknown — ask the user |
+| firewall, asa, fortinet, palo, cisco_asa, meraki, catalyst, checkpoint, juniper, sophos, sonicwall | network |
+| aws, gcp, azure, entra, okta, o365, gsuite, cloudtrail, guardduty | cloud |
+| wineventlog, sysmon, perfmon, windows, win_, sccm, defender, biztalk, sharepoint, iis | windows |
+| linux, syslog, rhel, ubuntu, centos, debian | linux |
+| access, apache, nginx, web, varnish, haproxy, traefik, caddy | web |
+| exchange, office, webex, teams, slack, zoom, gmail, mail | collaboration |
+| sap, erp, oracle_ebs, dynamics | erp |
+| servicenow, itsm, jira, zendesk | itsm |
+| cybervision, plc, scada, ot, modbus, dnp3, profinet | ot |
+| oracle, mssql, postgres, mysql, mongodb, redis, db2, mariadb, audit | database |
+| pos, retail, shopify, magento | retail |
+| (no match) | ask the user — never use "unknown" |
 
-If category is `unknown`, ask:
-> "I couldn't guess the category from the source name. Pick one: network, cloud, windows, linux, web, retail, collaboration, itsm, erp, ot, database"
+If no token matches, ask the user explicitly:
+> "I couldn't guess the category from the source name `<source_id>`. Pick one: network, cloud, windows, linux, web, retail, collaboration, itsm, erp, ot, database"
+
+**Never write `category = "unknown"`.** The category MUST be one of the
+valid OUTPUT_DIRS keys before proceeding to Phase C. If the user picks
+something not in that list, re-ask.
 
 ### B.sample.6 Volume category guessing
 

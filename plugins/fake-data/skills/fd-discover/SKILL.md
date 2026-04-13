@@ -311,16 +311,26 @@ Same table as fd-add-generator. Check tokens in source_id:
 
 | Tokens | Category |
 |---|---|
-| firewall, asa, fortinet, palo, meraki, catalyst | network |
-| aws, gcp, azure, entra, okta | cloud |
-| wineventlog, sysmon, perfmon, mssql | windows |
-| linux, syslog | linux |
-| access, apache, nginx, web | web |
-| exchange, office, webex, teams | collaboration |
-| sap, erp | erp |
-| servicenow, itsm | itsm |
-| cybervision, plc, scada, ot | ot |
-| no match | unknown (ask user) |
+| firewall, asa, fortinet, palo, meraki, catalyst, checkpoint, juniper, sophos, sonicwall | network |
+| aws, gcp, azure, entra, okta, o365, gsuite, cloudtrail, guardduty | cloud |
+| wineventlog, sysmon, perfmon, windows, win_, sccm, defender, biztalk, sharepoint, iis | windows |
+| linux, syslog, rhel, ubuntu, centos, debian | linux |
+| access, apache, nginx, web, varnish, haproxy, traefik, caddy | web |
+| exchange, office, webex, teams, slack, zoom, gmail, mail | collaboration |
+| sap, erp, oracle_ebs, dynamics | erp |
+| servicenow, itsm, jira, zendesk | itsm |
+| cybervision, plc, scada, ot, modbus, dnp3, profinet | ot |
+| oracle, mssql, postgres, mysql, mongodb, redis, db2, mariadb, audit | database |
+| pos, retail, shopify, magento | retail |
+| no match | use vendor/product hint from RESEARCH_FINDINGS to pick the closest valid category, never write "unknown" |
+
+**Never emit `category = "unknown"` in the SPEC.** The valid set is:
+`network, cloud, windows, linux, web, collaboration, erp, itsm, ot,
+database, retail`. If no token in the source_id matches AND the research
+subagent's vendor/product hint also doesn't suggest one of these, fall
+back to `network` (the safest default — has the broadest CIM coverage)
+and flag `category_confidence = 0.3` so the review gate surfaces the
+guess to the user.
 
 ### C.6 Build Findings
 
