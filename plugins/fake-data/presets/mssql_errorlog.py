@@ -13,8 +13,8 @@ PRESET = {
         "description": "Microsoft SQL Server ERRORLOG file — plain-text log written by the SQL Server engine containing startup messages, login audit events, backup/restore events, and errors. Each line begins with a timestamp, source component, and optionally a SPID, followed by the message text.",
     },
 
-    "category": "windows",
-    "source_groups": ["windows", "database"],
+    "category": "database",
+    "source_groups": ["database", "windows"],
 
     "format": {
         "type": "delimited",

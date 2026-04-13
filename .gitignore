@@ -15,7 +15,7 @@ venv/
 # Scratch / test output
 .planning/discover/
 full_test_*/
-yolo_test*/
+yolo_*/
 tmp/
 .claude/settings.json
 docs/superpowers/

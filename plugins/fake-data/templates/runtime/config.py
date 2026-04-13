@@ -37,6 +37,7 @@ OUTPUT_DIRS = {
     "itsm": OUTPUT_BASE / "itsm",
     "erp": OUTPUT_BASE / "erp",
     "ot": OUTPUT_BASE / "ot",
+    "database": OUTPUT_BASE / "database",
     "unknown": OUTPUT_BASE / "unknown",
 }
 

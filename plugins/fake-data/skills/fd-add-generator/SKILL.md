@@ -158,7 +158,7 @@ Check if any of these tokens appear in `source_id` (first match wins):
 | (no match) | unknown — ask the user |
 
 If category is `unknown`, ask:
-> "I couldn't guess the category from the source name. Pick one: network, cloud, windows, linux, web, retail, collaboration, itsm, erp, ot"
+> "I couldn't guess the category from the source name. Pick one: network, cloud, windows, linux, web, retail, collaboration, itsm, erp, ot, database"
 
 ### B.sample.6 Volume category guessing
 
@@ -170,6 +170,7 @@ If category is `unknown`, ask:
 | access, web, apache, nginx | web |
 | email, exchange | email |
 | ot, plc, scada | ot |
+| database, oracle, mssql, postgres, mysql, db2 | auth |
 | (no match) | firewall (safe default) |
 
 ### B.sample.7 Sample events
@@ -194,7 +195,7 @@ Ask these questions **one at a time**.
 
 ### W.1 Category
 
-> "What category for this source? Pick one: network, cloud, windows, linux, web, retail, collaboration, itsm, erp, ot [<guess from source_id or 'network'>]"
+> "What category for this source? Pick one: network, cloud, windows, linux, web, retail, collaboration, itsm, erp, ot, database [<guess from source_id or 'network'>]"
 
 ### W.2 Format
 
@@ -331,6 +332,13 @@ def generate_<source_id>_logs(
 ```
 
 The body follows the template pattern: loop days -> hours -> calc_natural_events -> _make_event -> sort -> write.
+
+**`base_count` rule of thumb:** Pass `base_count=int(100 * scale)` to
+`calc_natural_events()` to land near the standard 1000 events/day baseline
+after weekend (20-30%) and night-hour (10-50%) dampening. Lower values
+(e.g. 40) drop daily totals to ~300/day which feels empty in Splunk demos.
+Override only if the source genuinely produces less (e.g. quarterly
+audit reports → `base_count=int(5 * scale)`).
 
 **`_make_event()` body:** For each field in Findings, generate a Python line based on type:
 

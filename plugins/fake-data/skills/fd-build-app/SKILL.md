@@ -456,17 +456,28 @@ Append format-specific settings based on the generator's `_serialize()` format:
 
 | Format | Props Settings |
 |---|---|
-| json | `KV_MODE = json`, `TIME_PREFIX = "timestamp"` (or first timestamp field name) |
-| kv | `KV_MODE = auto`, `TIME_FORMAT = %Y-%m-%dT%H:%M:%S` |
+| json | `KV_MODE = json`, `TIME_PREFIX = "timestamp"\s*:\s*"` (or first timestamp field name) |
+| kv | `KV_MODE = auto`, `TIME_PREFIX = timestamp=`, `TIME_FORMAT = %Y-%m-%dT%H:%M:%SZ` |
 | csv | `INDEXED_EXTRACTIONS = csv`, `HEADER_FIELD_LINE_NUMBER = 1` |
 | syslog_bsd | `TIME_FORMAT = %b %d %H:%M:%S` |
-| syslog_rfc5424 | `TIME_FORMAT = %Y-%m-%dT%H:%M:%S` |
+| syslog_rfc5424 | `TIME_FORMAT = %Y-%m-%dT%H:%M:%S.%3NZ`, `TZ = UTC` |
 | cef | `TIME_FORMAT = %b %d %Y %H:%M:%S` |
-| xml | `KV_MODE = xml` |
+| xml | `KV_MODE = xml`, `TIME_PREFIX = <Extended_Timestamp>` (or first timestamp tag), `TIME_FORMAT = %Y-%m-%dT%H:%M:%S.%6NZ`, `TZ = UTC` |
 
 Read each generator's `_serialize()` method to determine the correct format.
 If the timestamp field name differs from `timestamp`, adjust `TIME_PREFIX`
 accordingly.
+
+**CRITICAL — ISO-8601 `Z` suffix is a literal, not a strptime token.**
+`%Z` in `TIME_FORMAT` matches *named* timezones like `UTC` or `EST` and
+will NOT match a trailing `Z`. To parse `2026-01-01T00:03:13.275303Z`:
+- End the format with literal `Z` (e.g. `%Y-%m-%dT%H:%M:%S.%6NZ`).
+- Always add `TZ = UTC` so Splunk applies the right offset.
+- Use `%3N` for milliseconds, `%6N` for microseconds. Match the precision
+  the generator actually emits — read `_serialize()` to confirm.
+
+Never write `%Y-%m-%dT%H:%M:%S.%6N%Z` — it will silently fail to parse and
+Splunk falls back to indexing-time.
 
 ### E.5 Write default/transforms.conf
 
@@ -477,6 +488,12 @@ FORMAT = IDX_demo_id::$1$2
 WRITE_META = true
 DEPTH_LIMIT = 99999
 ```
+
+**Write this stanza VERBATIM.** Do not interpolate skill arguments, source
+IDs, scenario names, or any runtime values into the `REGEX` or `FORMAT`
+lines. The regex has two capture groups and `$1$2` concatenates whichever
+matched (only one will, since they are alternatives). Any other value in
+`FORMAT` breaks indexed-time demo_id extraction.
 
 The regex handles both JSON format (`"demo_id": "value"`) and KV format
 (`demo_id=value`). The `WRITE_META = true` directive writes the extracted

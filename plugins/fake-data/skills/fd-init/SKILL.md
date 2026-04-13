@@ -472,9 +472,26 @@ FAKE_DATA_WORKSPACE_VERSION = 1
 INITIALIZED_AT = "<current UTC ISO-8601>"
 PLUGIN_VERSION_AT_INIT = "0.1.0"
 ORG_NAME_AT_INIT = "<ORG_NAME>"
-SETUP_MODE = "<quick/custom/just-data>"
+SETUP_MODE = "<quick|custom|just-data|yolo>"
 PURPOSE_AT_INIT = "<purpose or empty string if not set>"
 ```
+
+**Compute `INITIALIZED_AT` at write time — do not hard-code.**
+Shell out via Bash to get the real timestamp so the manifest reflects when
+this run actually happened:
+
+```bash
+date -u +"%Y-%m-%dT%H:%M:%SZ"
+```
+
+Interpolate that value into the file. Never write a guessed date (the
+agent's conversation date is not the same as wall-clock UTC, and different
+runs on the same day still deserve distinct timestamps to the second).
+
+**Allowed `SETUP_MODE` values:** `quick`, `custom`, `just-data`, `yolo`.
+Use `yolo` when the run was invoked with `--yolo`, even if the underlying
+defaults match `quick` — downstream skills may key off this to adjust
+prompting behavior.
 
 ### C.5 Compose README.md content
 

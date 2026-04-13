@@ -172,7 +172,17 @@ SOURCES_CONSULTED:
 END_SOURCES_CONSULTED
 
 SPLUNKBASE_SOURCETYPE: <sourcetype name if found, or "none">
+
+WEB_ACCESS_USED:
+<one of: "yes" if you actually called WebFetch and/or WebSearch in this run, or "no" if your environment did not provide those tools and you fell back on prior knowledge>
+END_WEB_ACCESS_USED
 ```
+
+**Honesty requirement:** If WebFetch/WebSearch are not available in your
+environment, set `WEB_ACCESS_USED: no` and leave `SOURCES_CONSULTED` empty.
+Do NOT fabricate URLs or invent trust scores. Knowledge-only research is
+still useful — but the parent skill needs to know so it can warn the user
+and lower confidence appropriately.
 
 ### B.3 Parse subagent response
 
@@ -186,7 +196,18 @@ When the subagent returns, parse its response into a `ResearchFindings` struct:
 - `field_hints`: parse FIELD_HINTS section into `[{name, description}]` pairs
 - `sources_consulted`: parse SOURCES_CONSULTED into `[{url, kind, trust}]` with `retrieved_at` = current UTC
 - `splunkbase_sourcetype`: from SPLUNKBASE_SOURCETYPE field
+- `web_access_used`: from WEB_ACCESS_USED field (default "unknown" if missing)
 - `elapsed_sec`: time between dispatch and completion
+
+**Verify research quality.** If `web_access_used != "yes"` OR `sources_consulted`
+is empty, the research was knowledge-only. In that case:
+- Cap all field confidences at 0.6 (down from default 0.85+)
+- Set `SPEC["research_quality"] = "knowledge_only"` (vs `"web_verified"`)
+- Print a warning before the review gate:
+  > "⚠️  Research was knowledge-only — the subagent did not use WebFetch/
+  >  WebSearch (either tools unavailable or no relevant results). Field
+  >  confidences capped at 0.6. Consider re-running with `--doc=<url>` or
+  >  providing `--sample=<file>` for higher trust."
 
 ### B.4 Fetch explicit --doc URLs (if not already fetched by subagent)
 
