@@ -13,13 +13,20 @@ Create a new FAKE_DATA workspace in the current directory. This skill generates 
 **Two modes:**
 
 1. **Interactive (default)** — `/fd-init` with no arguments. Wizard-based setup with defaults.
-2. **Full pipeline (`--yolo`)** — `/fd-init <log-file> [--description="..."] [--scenario="..."] --yolo`. Runs the entire pipeline from init all the way through log generation, stopping just before Splunk TA packaging. The only required argument is the log file path. Everything else is auto-filled.
+2. **Full pipeline (`--yolo`)** — `/fd-init <source> [--description="..."] [--scenario="..."] --yolo`. Runs the entire pipeline from init all the way through log generation, stopping at the Splunk TA build step. The `<source>` can be either a log file path OR a free-text description ("aws cloudtrail", "oracle database audit logs", "fortigate firewall"). When given a description, fd-discover does pure research (no sample needed). YOLO is supposed to be YOLO — minimal friction.
 
 **Examples:**
 ```
-/fd-init
+# YOLO with a sample log file
 /fd-init firewall.log --yolo
-/fd-init firewall.log --description="SOC demo for energy company" --scenario=brute_force --yolo
+
+# YOLO with just a description (research-only, no sample)
+/fd-init "fortigate firewall" --yolo
+/fd-init "oracle database audit logs" --yolo
+/fd-init "aws cloudtrail" --description="cloud security demo" --scenario="data_exfil" --yolo
+
+# Interactive (no --yolo)
+/fd-init
 ```
 
 ---
@@ -84,13 +91,34 @@ If the invocation included `--yolo`, skip ALL questions in this phase and
 execute the full pipeline automatically. This is the "I trust you, just do
 everything" mode.
 
-**Required argument:** A log file path (first positional argument).
+**Required argument:** A `<source>` — first positional argument. Can be EITHER:
+- A log file path (e.g. `firewall.log`, `/tmp/sample.json`), OR
+- A free-text description of the source (e.g. `"fortigate firewall"`,
+  `"oracle database audit logs"`, `"aws cloudtrail"`)
+
 **Optional arguments:**
 - `--description="..."` — Sets the workspace purpose. If it describes a real
   company, fd-init will research it for locations and industry.
 - `--scenario=<type>` — Creates a scenario after the generator is in place.
   Type can be a keyword like `brute_force`, `data_exfil`, `disk_filling`,
   or a free-text description.
+
+**Detect source type:** Before starting, check if `<source>` is a file:
+
+```python
+import os
+is_file = os.path.isfile(source) or os.path.isfile(os.path.expanduser(source))
+```
+
+If `is_file`: treat as `--sample=<path>` for fd-discover.
+If NOT a file: treat as a free-text source description for fd-discover research mode.
+
+**Important:** YOLO is YOLO. Do NOT block on "I can't guess the format without
+a sample". If the source isn't a file, just pass it as a description string
+and let fd-discover do pure research (vendor docs, Splunkbase, samples). That's
+literally what fd-discover is designed for. Only stop with an error if BOTH
+the file path doesn't exist AND the string is so vague it can't even be turned
+into a source_id (e.g. empty string, single character).
 
 **YOLO pipeline execution:**
 
@@ -100,10 +128,29 @@ everything" mode.
    "Example Corp" defaults. SKIP the review gate. Go directly to Phase E
    (write files).
 
-2. **fd-discover <log-file>** — After Phase F writes the workspace, invoke
-   `/fd-discover` with the log file as `--sample=<path>`. If the file
-   matches a bundled preset (check presets/ by filename heuristic), use
-   the preset. Auto-accept all confidence gates.
+2. **fd-discover <source>** — After Phase F writes the workspace, invoke
+   `/fd-discover` with one of two paths:
+
+   **A) If `<source>` is a file:**
+   - Derive source_id from filename (strip extension, normalize)
+   - Invoke `/fd-discover <source_id> --sample=<path>`
+   - fd-discover detects format from the sample
+
+   **B) If `<source>` is a description (text, not a file):**
+   - Derive source_id from the description by extracting the most distinctive
+     noun phrase. Examples:
+     - `"fortigate firewall"` → `fortigate`
+     - `"oracle database audit logs"` → `oracle_audit`
+     - `"aws cloudtrail"` → `aws_cloudtrail`
+     - `"palo alto ngfw traffic"` → `palo_alto_traffic`
+   - Invoke `/fd-discover <source_id>` (no --sample flag)
+   - fd-discover does its normal preset check first (might match a bundled
+     preset for instant results), then runs the research subagent if no
+     preset is found.
+
+   In BOTH cases: auto-accept all fd-discover confidence gates. Do not
+   prompt the user. If research yields a low-confidence result (< 0.6),
+   note it in the summary at the end but proceed anyway.
 
 3. **fd-add-generator <source_id>** — Invoke after fd-discover completes.
    It will auto-detect the SPEC.py. Auto-accept the review gate.
