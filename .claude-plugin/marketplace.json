@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "fake-data",
+  "description": "FAKE_DATA — A-to-Z Claude Code plugin for generating synthetic Splunk log data. Research log formats, scaffold generators, produce realistic events from a user-defined fictional world, and package as installable Splunk TAs.",
+  "owner": {
+    "name": "Lyder Hansen"
+  },
+  "plugins": [
+    {
+      "name": "fake-data",
+      "description": "FAKE_DATA — A-to-Z Claude Code plugin for generating synthetic Splunk log data. 8 skills for the full pipeline: workspace creation, log format discovery, generator scaffolding, scenario authoring, CIM mapping, log generation, and Splunk TA packaging.",
+      "source": ".",
+      "category": "productivity",
+      "homepage": "https://github.com/lyderhansen/fake-data",
+      "author": {
+        "name": "Lyder Hansen"
+      }
+    }
+  ]
+}
