@@ -9,18 +9,65 @@ FAKE_DATA helps you build a fictional world (organization, locations, users, inf
 
 ## Installation
 
-**Option 1 — Clone into Claude Code plugins directory:**
+This repo is structured as a **Claude Code marketplace** (named `lyder`) containing one plugin (`fake-data`). Pick the install method that fits your situation.
+
+### Option 1 — Install via Claude Code plugin manager (public repo)
+
+If you have access to the GitHub repo, install directly from the URL:
+
+1. In Claude Code, run `/plugin`
+2. Go to the **Marketplaces** tab → **Add Marketplace**
+3. Paste: `lyderhansen/fake-data` (or full URL: `https://github.com/lyderhansen/fake-data`)
+4. Press Enter — Claude Code clones the marketplace
+5. Go to the **Discover** tab → search "fake-data" → Install
+6. Restart Claude Code (or run `/reload-plugins`)
+
+### Option 2 — Manual install (private repo, no GitHub access needed)
+
+If the repo is private or you have a local clone:
+
 ```bash
-git clone https://github.com/lyderhansen/fake-data.git ~/.claude/plugins/fake-data
+# 1. Clone (or pull latest) into the marketplaces directory
+git clone https://github.com/lyderhansen/fake-data.git \
+          ~/.claude/plugins/marketplaces/lyder
+
+# OR if you already have a local copy elsewhere, symlink it:
+ln -s /path/to/your/fake-data \
+      ~/.claude/plugins/marketplaces/lyder
+
+# 2. In Claude Code, register the marketplace:
+#    /plugin → Marketplaces → Add Marketplace → ~/.claude/plugins/marketplaces/lyder
+
+# 3. Install the plugin:
+#    /plugin → Discover → fake-data → Install for you (user scope)
+
+# 4. Restart Claude Code or /reload-plugins
 ```
 
-**Option 2 — Symlink (for development):**
+**Updating later:**
 ```bash
-git clone https://github.com/lyderhansen/fake-data.git ~/code/fake-data
-ln -s ~/code/fake-data ~/.claude/plugins/fake-data
+cd ~/.claude/plugins/marketplaces/lyder && git pull
+# Then in Claude Code: /reload-plugins
 ```
 
-Once installed, open Claude Code in any directory. You should see `fake-data:fd-*` skills available (or search for `/fake` to find them). The SessionStart hook will announce the plugin on startup.
+### Option 3 — Development mode (--plugin-dir)
+
+If you're actively developing the plugin, skip the marketplace dance entirely and load it directly:
+
+```bash
+# Add to ~/.zshrc or ~/.bashrc:
+alias claude='claude --plugin-dir /path/to/fake-data/plugins/fake-data'
+```
+
+Now `claude` always loads the plugin from your source directory. Edits become live with `/reload-plugins` — no reinstall needed.
+
+### Verify installation
+
+After installation (any method), open Claude Code in any directory. You should see:
+
+1. **SessionStart announcement** at the top: `🎯 FAKE_DATA plugin loaded — 8 skills available...`
+2. **Skills available** when you type `/fake` or `/fd-` — both `fake-data:fd-init` and `/fd-init` should work
+3. **`/plugin → Installed`** lists `fake-data` from marketplace `lyder`
 
 ## Quick start
 

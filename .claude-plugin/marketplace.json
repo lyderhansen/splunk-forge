@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "fake-data",
-  "description": "FAKE_DATA — A-to-Z Claude Code plugin for generating synthetic Splunk log data. Research log formats, scaffold generators, produce realistic events from a user-defined fictional world, and package as installable Splunk TAs.",
+  "name": "lyder",
+  "description": "Lyder Hansen's Claude Code plugins. Currently hosts the fake-data plugin for synthetic Splunk log generation.",
   "owner": {
     "name": "Lyder Hansen"
   },
