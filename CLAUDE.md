@@ -65,19 +65,20 @@ fake-data/
 ├── presets/                     # ✅ 20 bundled presets (fortigate, cisco_asa, aws_cloudtrail, etc.)
 │   ├── README.md
 │   └── <source_id>.py           # each preset is a PRESET dict
-├── docs/
-│   └── superpowers/
-│       ├── specs/
-│       └── plans/
 ├── README.md
 ├── CLAUDE.md                    # this file
 ├── CHANGEHISTORY.md
 └── LICENSE
 ```
 
+**Note:** `docs/superpowers/` (specs and plans) is gitignored. Design
+documents remain on disk locally for contributors but are not committed
+to the public repo, to keep the download size small and focus the repo
+on runtime artifacts.
+
 ## Design process
 
-This plugin is built using the superpowers workflow: brainstorming → spec → plan → subagent-driven execution. Specs live in `docs/superpowers/specs/`, plans in `docs/superpowers/plans/`. Every meaningful task is committed atomically.
+This plugin is built using the superpowers workflow: brainstorming → spec → plan → subagent-driven execution. Design documents (specs, plans) live locally in `docs/superpowers/` and are NOT committed to git — they are working notes for contributors.
 
 ## Relationship to The FAKE T-Shirt Company
 
