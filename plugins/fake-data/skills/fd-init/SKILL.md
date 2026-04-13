@@ -1,6 +1,6 @@
 ---
 name: fd-init
-description: Create a new FAKE_DATA workspace with a fictional organization. Generates world.py, config, runtime templates, and directory structure.
+description: 'Create a new FAKE_DATA workspace. Args: [<source>] [--description=...] [--scenario=...] [--yolo]. Use --yolo for full pipeline automation from source to logs.'
 version: 0.1.0
 metadata:
   argument-hint: "[<log-file>] [--description=...] [--scenario=...] [--yolo]"

@@ -1,6 +1,6 @@
 ---
 name: fd-discover
-description: Discover and analyze a log format from a source name, sample file, or vendor documentation. Produces a SPEC.py that fd-add-generator can consume.
+description: 'Research a log format. Args: <source_id> [--sample=<path>] [--doc=<url>] [--description=<text>] [--no-search]. Produces SPEC.py for fd-add-generator.'
 version: 0.1.0
 metadata:
   argument-hint: "<source_id> [--sample=<path>] [--doc=<url>] [--description=<text>] [--no-search]"

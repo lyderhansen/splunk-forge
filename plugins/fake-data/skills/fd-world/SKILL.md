@@ -1,6 +1,6 @@
 ---
 name: fd-world
-description: View and modify the organization world state (users, locations, infrastructure). Interactive CRUD for world.py.
+description: 'Interactive CRUD for world.py. No args. Add/edit/remove users, locations, and infrastructure with review gates.'
 version: 0.1.0
 ---
 

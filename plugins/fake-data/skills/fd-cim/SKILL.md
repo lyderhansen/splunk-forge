@@ -1,6 +1,6 @@
 ---
 name: fd-cim
-description: Map generator fields to Splunk CIM (Common Information Model). Produces CIM mapping files consumed by fd-build-app.
+description: 'Map generator fields to Splunk CIM. Args: <source_id>. Produces CIM_MAPPING file in fake_data/cim/ for fd-build-app to use.'
 version: 0.1.0
 metadata:
   argument-hint: "<source_id>"

@@ -1,6 +1,6 @@
 ---
 name: fd-add-generator
-description: Scaffold a new log generator from a sample file or interactive wizard. Creates a Python generator in fake_data/generators/.
+description: 'Scaffold a Python log generator. Args: <source_id> [--sample=<path>] [--category=<cat>] [--format=<fmt>]. Auto-detects SPEC.py from fd-discover.'
 version: 0.1.0
 metadata:
   argument-hint: "<source_id> [--sample=<path>] [--category=<cat>] [--format=<fmt>]"

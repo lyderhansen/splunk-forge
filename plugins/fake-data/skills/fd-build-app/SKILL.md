@@ -1,6 +1,6 @@
 ---
 name: fd-build-app
-description: Generate a Splunk Technology Add-on (TA) from workspace generators, scenarios, and world state. Produces installable app with sourcetypes, CIM alignment, and tar.gz package.
+description: 'Build an installable Splunk TA. Args: [app_name]. Generates inputs.conf, props.conf (with MAX_DAYS_HENCE), CIM alignment, and tar.gz package.'
 version: 0.1.0
 metadata:
   argument-hint: "[app_name]"

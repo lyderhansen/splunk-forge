@@ -1,6 +1,6 @@
 ---
 name: fd-add-scenario
-description: Create a new attack or operational scenario. Use when adding coordinated events across multiple log sources.
+description: 'Create a multi-phase scenario (attack/ops/network). Args: <scenario_id_or_description> [--auto]. Correlates events across generators via demo_id.'
 version: 0.1.0
 metadata:
   argument-hint: "<scenario_id_or_description> [--auto]"

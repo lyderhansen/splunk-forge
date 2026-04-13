@@ -1,6 +1,6 @@
 ---
 name: fd-generate
-description: Generate demo log data for Splunk. Use when you need to create synthetic logs for testing, demos, or training.
+description: 'Generate synthetic Splunk log files. Args: [--days=N] [--scenarios=X] [--sources=X]. Or launch the curses TUI: python3 fake_data/tui_generate.py'
 version: 0.1.0
 metadata:
   argument-hint: "[--days=N] [--scenarios=X] [--sources=X]"
