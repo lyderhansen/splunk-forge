@@ -102,6 +102,11 @@ everything" mode.
 - `--scenario=<type>` — Creates a scenario after the generator is in place.
   Type can be a keyword like `brute_force`, `data_exfil`, `disk_filling`,
   or a free-text description.
+- `--single-source` — Disables companion auto-scaffolding in step 3b.
+  By default YOLO auto-adds 1-2 companion generators so the demo tells
+  a fuller correlated story (e.g. wineventlog_security also scaffolds
+  sysmon + entraid_signin). Use this flag when you genuinely only want
+  one generator.
 
 **Detect source type:** Before starting, check if `<source>` is a file:
 
@@ -153,28 +158,58 @@ into a source_id (e.g. empty string, single character).
    note it in the summary at the end but proceed anyway.
 
 3. **fd-add-generator <source_id>** — Invoke after fd-discover completes.
-   It will auto-detect the SPEC.py. Auto-accept the review gate.
+   It will auto-detect the SPEC.py. Auto-accept the review gate. Add
+   the primary source_id to the running list `scaffolded_sources`.
 
-4. **fd-cim <source_id>** — Invoke after generator is scaffolded. Use
-   rule-based mapping only (skip research subagent for unmapped fields).
-   Auto-accept the review gate.
+3b. **Auto-scaffold companion sources.** A single-source demo feels thin
+   in Splunk. Look up companions for the primary source in the plugin's
+   `data/yolo_companions.py` map:
+
+   ```python
+   from fake_data_plugin_data.yolo_companions import get_companions
+   companions = get_companions(primary_source_id, category=<from SPEC>)
+   # Returns 0-2 companion source IDs, all of which are bundled presets.
+   ```
+
+   For each companion in the returned list:
+   - Invoke `/fd-add-generator <companion_id> --auto`. The preset path
+     (A.4c) makes this a near-instant preset load, no research.
+   - Append `<companion_id>` to `scaffolded_sources`.
+   - If the companion scaffolding fails for any reason (missing preset,
+     syntax error), warn but do NOT abort the YOLO pipeline — continue
+     with whatever sources succeeded.
+
+   **Opt out with `--single-source`:** If the user invoked YOLO with
+   `--single-source`, skip this entire step and `scaffolded_sources`
+   stays at `[primary_source_id]` only.
+
+   **Example:** `/fd-init wineventlog_security --yolo` →
+   `scaffolded_sources = ["wineventlog_security", "sysmon", "entraid_signin"]`
+   (per the Windows endpoint story in `yolo_companions.py`).
+
+4. **fd-cim for each scaffolded source.** Loop over `scaffolded_sources`
+   and invoke `/fd-cim <source_id>` for each. Use rule-based mapping
+   only (skip research subagent). Auto-accept each review gate. The
+   per-source CIM files let fd-build-app emit per-source props stanzas
+   and lookups.
 
 5. **fd-add-scenario** — Always run in YOLO. A demo without correlated
    events is a worse demo than one with a sensible default scenario.
+   With multiple scaffolded sources, the scenario is where cross-source
+   correlation happens — the scenario writes `<source>_hour` methods
+   for all sources in `scaffolded_sources`, tagging every emitted event
+   with the same `demo_id` so Splunk can bind them together in searches.
 
    **Pick the scenario_id:**
    - If `--scenario=<value>` was passed on the command line, use it
      verbatim (after normalization).
    - Otherwise derive a default scenario_id by appending `_demo` to the
-     source_id from step 2: e.g. `oracle_audit` → `oracle_audit_demo`,
-     `fortigate` → `fortigate_demo`, `aws_cloudtrail` → `aws_cloudtrail_demo`.
-     fd-add-scenario's research subagent will use the source_id as a seed
-     and design realistic phases against it.
+     PRIMARY source_id from step 2: e.g. `wineventlog_security` →
+     `wineventlog_security_demo`, `fortigate` → `fortigate_demo`.
 
-   Invoke `/fd-add-scenario <scenario_id> --auto`. The `--auto` flag skips
-   source-matching prompts and the review gate. fd-add-scenario will
-   research the scenario type, design 3–5 phases, and write
-   `fake_data/scenarios/<scenario_id>.py`.
+   Invoke `/fd-add-scenario <scenario_id> --auto --sources=<comma-joined scaffolded_sources>`.
+   fd-add-scenario picks up all the sources from `--sources` and
+   writes `_hour` methods for each. Auto-accept the review gate.
 
    If fd-add-scenario fails (e.g. research returns nothing), warn but do
    not abort the YOLO pipeline — the user still gets a working baseline
@@ -182,8 +217,10 @@ into a source_id (e.g. empty string, single character).
 
 6. **fd-generate** — Auto-run with `--days=<end_day + 2>` (read end_day
    from the scenario created in step 5; falls back to 7 if step 5 failed),
-   `--sources=<source_id>`, `--scenarios=<scenario_id>`. Stream output
-   to user.
+   `--sources=<comma-joined scaffolded_sources>`, `--scenarios=<scenario_id>`.
+   Stream output to user. With multiple sources this produces a
+   multi-log-stream demo where all events tied to the scenario carry
+   the same demo_id for correlation.
 
 7. **Print summary and prompt to build the app.** After fd-generate
    completes, show the summary and ask one question:
@@ -192,11 +229,15 @@ into a source_id (e.g. empty string, single character).
    🚀 YOLO pipeline complete!
 
    Workspace:  ./fake_data/ (<ORG_NAME>)
-   Generator:  fake_data/generators/generate_<source_id>.py
-   CIM:        fake_data/cim/<source_id>.py
+   Sources:    <primary_source_id> (primary)
+               <companion_1>       (companion)
+               <companion_2>       (companion)
+   CIM:        fake_data/cim/<source>.py  × <N>
    Scenario:   fake_data/scenarios/<scenario_id>.py
-   Output:     fake_data/output/<category>/<source_id>.log
-               <N> events over <days> days (incl. <M> scenario events)
+                 correlates <N> sources via demo_id=<scenario_id>
+   Output:     fake_data/output/<cat>/<source>.log  × <N>
+               <total> events over <days> days
+               (incl. <M> scenario events across all sources)
    ```
 
    Then ask:
@@ -211,19 +252,22 @@ into a source_id (e.g. empty string, single character).
 
    - **yes**: invoke `/fd-build-app <APP_NAME>` with a derived app name.
 
-     **Derive APP_NAME from the source(s) scaffolded in this YOLO run:**
-     - **Single source** (the typical YOLO case): use
-       `TA-<SOURCE_ID_UPPER>` where `SOURCE_ID_UPPER` is the source_id
-       from step 2 uppercased with underscores converted to hyphens.
-       Examples: `oracle_audit` → `TA-ORACLE-AUDIT`, `fortigate` →
-       `TA-FORTIGATE`, `aws_cloudtrail` → `TA-AWS-CLOUDTRAIL`.
-     - **Multiple sources** (rare in YOLO): fall back to
-       `TA-<ORG_NAME_UPPER>`.
+     **Derive APP_NAME from the PRIMARY source, regardless of how many
+     companions were auto-scaffolded.** The TA is named after the story
+     it tells, and the story is anchored by the primary source the user
+     asked for. Companions are supporting cast.
 
-     Why source-derived? Multiple YOLO runs all defaulted to
-     `TA-EXAMPLE-CORP` and clobbered each other. Source-derived names
-     make every run distinguishable and the resulting TA self-describes
-     what's inside.
+     Use `TA-<PRIMARY_SOURCE_ID_UPPER>` where `PRIMARY_SOURCE_ID_UPPER`
+     is the primary source_id (from step 2) uppercased with underscores
+     converted to hyphens:
+
+     - `wineventlog_security` → `TA-WINEVENTLOG-SECURITY` (even if sysmon
+       + entraid_signin were auto-added as companions)
+     - `fortigate` → `TA-FORTIGATE`
+     - `aws_cloudtrail` → `TA-AWS-CLOUDTRAIL`
+
+     This gives every YOLO run a distinct, self-describing TA name even
+     though the underlying TA contains multiple correlated generators.
 
      Pass `<APP_NAME>` as the first positional argument to `/fd-build-app`,
      plus `--cim-level=full --auto` so it doesn't prompt. After

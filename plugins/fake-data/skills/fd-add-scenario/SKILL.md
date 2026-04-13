@@ -1,9 +1,9 @@
 ---
 name: fd-add-scenario
-description: 'Create a multi-phase scenario (attack/ops/network). Args: <scenario_id_or_description> [--auto]. Correlates events across generators via demo_id.'
+description: 'Create a multi-phase scenario (attack/ops/network). Args: <scenario_id_or_description> [--auto] [--sources=<csv>]. Correlates events across generators via demo_id.'
 version: 0.1.0
 metadata:
-  argument-hint: "<scenario_id_or_description> [--auto]"
+  argument-hint: "<scenario_id_or_description> [--auto] [--sources=<csv>]"
 ---
 
 # fd-add-scenario -- Create a scenario for correlated events
@@ -39,7 +39,7 @@ If found, set the workspace root to the directory containing `fake_data/`.
 
 ### A.2 Parse input
 
-Expected invocation: `/fd-add-scenario <scenario_id_or_description> [--auto]`
+Expected invocation: `/fd-add-scenario <scenario_id_or_description> [--auto] [--sources=<csv>]`
 
 If no argument provided, prompt:
 
@@ -51,6 +51,14 @@ scenario_id from the first meaningful noun/verb pair (e.g., "brute force
 login attack" -> `brute_force`).
 
 If `--auto` is present, note it for later phases (skip interactive prompts).
+
+If `--sources=<csv>` is present, parse it into a list of source IDs and
+store as `explicit_sources`. This overrides the research subagent's
+`suggested_sources` in Phase C — the scenario will bind its phases
+directly to the provided sources. Used by `/fd-init --yolo` to force
+scenarios to cover the primary + companion sources that were just
+scaffolded. If `--sources` is omitted, behavior is unchanged (research
+subagent suggests sources, matched against available generators).
 
 ### A.3 Normalize scenario_id
 
@@ -190,8 +198,17 @@ and fill gaps with reasonable defaults based on the scenario_id.
 
 ### C.1 Match sources
 
-Compare `suggested_sources` from research against `available_sources`
-from Phase A.5:
+**If `explicit_sources` was set in A.2 (via `--sources=<csv>`):**
+Use those as the authoritative source list. Skip the research subagent's
+suggestions entirely. Verify each explicit source exists in
+`available_sources`:
+- **matched**: all explicit sources that exist in the workspace
+- **missing**: explicit sources that don't exist (warn but continue
+  with whichever DO exist — YOLO's companion map may reference presets
+  that weren't scaffolded if fd-add-generator failed silently)
+
+**Otherwise:** compare `suggested_sources` from research against
+`available_sources` from Phase A.5:
 - **matched**: source_id exists in available generators
 - **missing**: source_id was suggested but no generator exists
 
