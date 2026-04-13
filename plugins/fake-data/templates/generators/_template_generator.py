@@ -84,14 +84,26 @@ def generate_TEMPLATE_logs(
     days: int = DEFAULT_DAYS,
     scale: float = DEFAULT_SCALE,
     scenarios: str = "none",
+    seed: int = None,
     output_file: str = None,
     progress_callback=None,
     quiet: bool = False,
 ) -> int:
     """Generate TEMPLATE log events.
 
+    Args:
+        seed: Deterministic seed for reproducible baseline events.
+            Same seed + same workspace produces identical output.
+            Defaults to None (non-deterministic).
+
     Returns the number of events generated.
     """
+    # Seed baseline randomness per-generator so multiple generators
+    # don't clobber each other's streams. Scenarios keep their own
+    # deterministic seeding from scenario_id — independent of this.
+    if seed is not None:
+        random.seed(f"{seed}:{SOURCE_META['source_id']}")
+
     events = []
     active_scenarios = expand_scenarios(scenarios, start_date=start_date)
 
@@ -181,6 +193,8 @@ if __name__ == "__main__":
     p.add_argument("--days", type=int, default=DEFAULT_DAYS)
     p.add_argument("--scale", type=float, default=DEFAULT_SCALE)
     p.add_argument("--scenarios", default="none")
+    p.add_argument("--seed", type=int, default=None,
+                   help="Deterministic seed for baseline events")
     p.add_argument("--output", default=None, help="Override output file path")
     p.add_argument("--quiet", action="store_true")
     args = p.parse_args()
@@ -190,6 +204,7 @@ if __name__ == "__main__":
         days=args.days,
         scale=args.scale,
         scenarios=args.scenarios,
+        seed=args.seed,
         output_file=args.output,
         quiet=args.quiet,
     )

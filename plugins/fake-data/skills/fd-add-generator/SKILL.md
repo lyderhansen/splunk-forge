@@ -486,11 +486,25 @@ def generate_<source_id>_logs(
     days: int = DEFAULT_DAYS,
     scale: float = DEFAULT_SCALE,
     scenarios: str = "none",
+    seed: int = None,
     output_file: str = None,
     progress_callback=None,
     quiet: bool = False,
 ) -> int:
 ```
+
+**`seed` parameter (required):** At the top of the function body, seed
+the generator's random stream from the combined `seed` + `source_id`
+so multiple generators in the same run don't clobber each other:
+
+```python
+if seed is not None:
+    random.seed(f"{seed}:{SOURCE_META['source_id']}")
+```
+
+Without this, running `main_generate.py --seed=42` produces
+non-deterministic output for this generator specifically. Scenarios
+still use their own `scenario_id`-based seed — unaffected by `--seed`.
 
 The body follows the template pattern: loop days -> hours -> calc_natural_events -> _make_event -> sort -> write.
 

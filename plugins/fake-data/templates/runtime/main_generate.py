@@ -126,6 +126,7 @@ def run_generators(discovered: Dict[str, Any], order: List[str],
                 days=args.days,
                 scale=args.scale,
                 scenarios=args.scenarios,
+                seed=args.seed,
                 progress_callback=None if args.quiet else _progress_callback,
                 quiet=args.quiet,
             )
@@ -207,6 +208,11 @@ Examples:
                         help=f"Volume scaling factor (default: {DEFAULT_SCALE})")
     parser.add_argument("--scenarios", default="none",
                         help="Scenario list (reserved for future use)")
+    parser.add_argument("--seed", type=int, default=None,
+                        help="Deterministic seed for baseline event generation. "
+                             "Same seed + same workspace = identical output, "
+                             "useful for A/B testing Splunk configs. Scenarios "
+                             "remain deterministic via their own scenario_id hash.")
     parser.add_argument("--list", action="store_true",
                         help="List registered generators and exit")
     parser.add_argument("--show-files", action="store_true",
