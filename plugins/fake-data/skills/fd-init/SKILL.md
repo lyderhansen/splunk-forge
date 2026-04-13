@@ -159,13 +159,31 @@ into a source_id (e.g. empty string, single character).
    rule-based mapping only (skip research subagent for unmapped fields).
    Auto-accept the review gate.
 
-5. **fd-add-scenario <scenario>** — Only if `--scenario` was provided.
-   Use `--auto` internally to skip source-matching prompts. Auto-accept
-   the review gate.
+5. **fd-add-scenario** — Always run in YOLO. A demo without correlated
+   events is a worse demo than one with a sensible default scenario.
 
-6. **fd-generate** — Auto-run with `--days=7` (or `end_day + 2` if a
-   scenario is active), `--sources=<source_id>`, `--scenarios=<scenario or none>`.
-   Stream output to user.
+   **Pick the scenario_id:**
+   - If `--scenario=<value>` was passed on the command line, use it
+     verbatim (after normalization).
+   - Otherwise derive a default scenario_id by appending `_demo` to the
+     source_id from step 2: e.g. `oracle_audit` → `oracle_audit_demo`,
+     `fortigate` → `fortigate_demo`, `aws_cloudtrail` → `aws_cloudtrail_demo`.
+     fd-add-scenario's research subagent will use the source_id as a seed
+     and design realistic phases against it.
+
+   Invoke `/fd-add-scenario <scenario_id> --auto`. The `--auto` flag skips
+   source-matching prompts and the review gate. fd-add-scenario will
+   research the scenario type, design 3–5 phases, and write
+   `fake_data/scenarios/<scenario_id>.py`.
+
+   If fd-add-scenario fails (e.g. research returns nothing), warn but do
+   not abort the YOLO pipeline — the user still gets a working baseline
+   demo from steps 1–4.
+
+6. **fd-generate** — Auto-run with `--days=<end_day + 2>` (read end_day
+   from the scenario created in step 5; falls back to 7 if step 5 failed),
+   `--sources=<source_id>`, `--scenarios=<scenario_id>`. Stream output
+   to user.
 
 7. **Print summary and prompt to build the app.** After fd-generate
    completes, show the summary and ask one question:
@@ -176,9 +194,9 @@ into a source_id (e.g. empty string, single character).
    Workspace:  ./fake_data/ (<ORG_NAME>)
    Generator:  fake_data/generators/generate_<source_id>.py
    CIM:        fake_data/cim/<source_id>.py
-   Scenario:   fake_data/scenarios/<scenario>.py  (if --scenario was set)
+   Scenario:   fake_data/scenarios/<scenario_id>.py
    Output:     fake_data/output/<category>/<source_id>.log
-               <N> events over <days> days
+               <N> events over <days> days (incl. <M> scenario events)
    ```
 
    Then ask:
@@ -191,11 +209,25 @@ into a source_id (e.g. empty string, single character).
 
 8. **Handle the answer:**
 
-   - **yes**: invoke `/fd-build-app` — it will use the CIM mappings created
-     in step 4, default to full CIM level, and name the app `TA-<ORG_NAME_UPPER>`.
-     Pass these as answers to fd-build-app's Phase B questions so it doesn't
-     prompt again. After fd-build-app completes, print the final path to
-     the `.tar.gz` package.
+   - **yes**: invoke `/fd-build-app <APP_NAME>` with a derived app name.
+
+     **Derive APP_NAME from the source(s) scaffolded in this YOLO run:**
+     - **Single source** (the typical YOLO case): use
+       `TA-<SOURCE_ID_UPPER>` where `SOURCE_ID_UPPER` is the source_id
+       from step 2 uppercased with underscores converted to hyphens.
+       Examples: `oracle_audit` → `TA-ORACLE-AUDIT`, `fortigate` →
+       `TA-FORTIGATE`, `aws_cloudtrail` → `TA-AWS-CLOUDTRAIL`.
+     - **Multiple sources** (rare in YOLO): fall back to
+       `TA-<ORG_NAME_UPPER>`.
+
+     Why source-derived? Multiple YOLO runs all defaulted to
+     `TA-EXAMPLE-CORP` and clobbered each other. Source-derived names
+     make every run distinguishable and the resulting TA self-describes
+     what's inside.
+
+     Pass `<APP_NAME>` as the first positional argument to `/fd-build-app`,
+     plus `--cim-level=full --auto` so it doesn't prompt. After
+     fd-build-app completes, print the final path to the `.tar.gz` package.
 
    - **skip**: stop here and print:
      ```
