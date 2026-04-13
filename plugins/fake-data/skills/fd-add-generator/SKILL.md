@@ -232,8 +232,16 @@ something not in that list, re-ask.
 | access, web, apache, nginx | web |
 | email, exchange | email |
 | ot, plc, scada | ot |
-| database, oracle, mssql, postgres, mysql, db2 | auth |
+| database, oracle, mssql, postgres, mysql, db2 | database |
+| sysmon, edr, crowdstrike, defender, endpoint | endpoint |
+| wineventlog, windows_security | windows |
 | (no match) | firewall (safe default) |
+
+Valid `volume_category` values (all have entries in `VOLUME_WEEKEND_FACTORS`):
+`default`, `cloud`, `auth`, `firewall`, `email`, `web`, `windows`,
+`endpoint`, `database`, `ot`. Never emit a value outside this list —
+the config falls back to `default` which may not match the source's
+real traffic pattern.
 
 ### B.sample.7 Sample events
 

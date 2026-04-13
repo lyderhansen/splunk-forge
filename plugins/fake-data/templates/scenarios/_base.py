@@ -151,11 +151,57 @@ class BaseScenario:
 
         return users[key % len(users)]
 
+    # Role preference per scenario category. Picker filters
+    # infrastructure to the first non-empty preference tier before
+    # falling back to the full list.
+    _INFRA_ROLE_PREFERENCE = {
+        "attack": [
+            ("workstation", "endpoint", "laptop", "desktop"),
+            ("server", "file_server", "directory_server", "log_collector"),
+            ("firewall", "switch", "router"),  # last resort
+        ],
+        "ops": [
+            ("server", "file_server", "directory_server", "database"),
+            ("workstation", "endpoint"),
+            ("firewall", "switch", "router"),
+        ],
+        "network": [
+            ("firewall", "router", "switch"),
+            ("server",),
+            ("workstation",),
+        ],
+    }
+
     def _pick_infra(self, infrastructure: list, seed: int, field_name: str) -> Optional[dict]:
-        """Pick an infrastructure entry deterministically."""
+        """Pick an infrastructure entry deterministically, preferring
+        semantically sensible roles for the scenario category.
+
+        Attack scenarios targeting a "host" or "workstation" should land
+        on an actual workstation, not a switch just because the hostname
+        sorted first. Weighted preference tiers below pick the first
+        non-empty tier that matches the scenario category.
+        """
         if not infrastructure:
             return None
         key = self._field_hash(seed, field_name)
+
+        category = self.meta().get("category", "")
+        tiers = self._INFRA_ROLE_PREFERENCE.get(category, [])
+
+        # Also bias by field name — "target_host" for an attack should
+        # prefer endpoint roles even more strongly than generic "host"
+        fn = field_name.lower()
+        if "workstation" in fn or "endpoint" in fn or "client" in fn:
+            tiers = [("workstation", "endpoint", "laptop", "desktop"), *tiers]
+        elif "server" in fn or "dc" in fn or "domain_controller" in fn:
+            tiers = [("server", "file_server", "directory_server"), *tiers]
+
+        for tier in tiers:
+            filtered = [e for e in infrastructure if e.get("role", "") in tier]
+            if filtered:
+                return filtered[key % len(filtered)]
+
+        # Fallback: original behavior (any infra, deterministic)
         return infrastructure[key % len(infrastructure)]
 
     def _find_infra_by_hostname(self, infrastructure: list, hostname: str) -> Optional[dict]:

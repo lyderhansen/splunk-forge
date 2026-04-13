@@ -98,6 +98,8 @@ VOLUME_WEEKEND_FACTORS = {
     "email": 75,
     "web": 110,
     "windows": 25,
+    "endpoint": 20,   # EDR/sysmon on workstations — low weekend activity
+    "database": 35,   # batch jobs run on weekends, user queries don't
     "ot": 90,
 }
 
