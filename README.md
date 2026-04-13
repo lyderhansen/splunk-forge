@@ -9,7 +9,7 @@ FAKE_DATA helps you build a fictional world (organization, locations, users, inf
 
 ## Installation
 
-This repo is structured as a **Claude Code marketplace** (named `lyders-splunk-tools`) containing one plugin (`fake-data`). Pick the install method that fits your situation.
+This repo is structured as a **Claude Code marketplace** (named `splunk-forge`) containing one plugin (`fake-data`). Pick the install method that fits your situation.
 
 ### Option 1 — Install via Claude Code plugin manager (public repo)
 
@@ -29,14 +29,14 @@ If the repo is private or you have a local clone:
 ```bash
 # 1. Clone (or pull latest) into the marketplaces directory
 git clone https://github.com/lyderhansen/fake-data.git \
-          ~/.claude/plugins/marketplaces/lyders-splunk-tools
+          ~/.claude/plugins/marketplaces/splunk-forge
 
 # OR if you already have a local copy elsewhere, symlink it:
 ln -s /path/to/your/fake-data \
-      ~/.claude/plugins/marketplaces/lyders-splunk-tools
+      ~/.claude/plugins/marketplaces/splunk-forge
 
 # 2. In Claude Code, register the marketplace:
-#    /plugin → Marketplaces → Add Marketplace → ~/.claude/plugins/marketplaces/lyders-splunk-tools
+#    /plugin → Marketplaces → Add Marketplace → ~/.claude/plugins/marketplaces/splunk-forge
 
 # 3. Install the plugin:
 #    /plugin → Discover → fake-data → Install for you (user scope)
@@ -46,7 +46,7 @@ ln -s /path/to/your/fake-data \
 
 **Updating later:**
 ```bash
-cd ~/.claude/plugins/marketplaces/lyders-splunk-tools && git pull
+cd ~/.claude/plugins/marketplaces/splunk-forge && git pull
 # Then in Claude Code: /reload-plugins
 ```
 
@@ -62,24 +62,24 @@ GitHub's "Download ZIP" button), you can install manually:
 #    Save to: ~/Downloads/fake-data-main.zip
 
 # 2. Remove any old version of the marketplace
-rm -rf ~/.claude/plugins/marketplaces/lyders-splunk-tools
+rm -rf ~/.claude/plugins/marketplaces/splunk-forge
 
 # 3. Unzip and rename
 unzip ~/Downloads/fake-data-main.zip -d ~/Downloads/
-mv ~/Downloads/fake-data-main ~/.claude/plugins/marketplaces/lyders-splunk-tools
+mv ~/Downloads/fake-data-main ~/.claude/plugins/marketplaces/splunk-forge
 
 # 4. Verify the structure
-ls ~/.claude/plugins/marketplaces/lyders-splunk-tools/.claude-plugin/marketplace.json
-ls ~/.claude/plugins/marketplaces/lyders-splunk-tools/plugins/fake-data/.claude-plugin/plugin.json
+ls ~/.claude/plugins/marketplaces/splunk-forge/.claude-plugin/marketplace.json
+ls ~/.claude/plugins/marketplaces/splunk-forge/plugins/fake-data/.claude-plugin/plugin.json
 # Both files should exist
 
 # 5. In Claude Code:
-#    /plugin → Marketplaces → Add Marketplace → ~/.claude/plugins/marketplaces/lyders-splunk-tools
+#    /plugin → Marketplaces → Add Marketplace → ~/.claude/plugins/marketplaces/splunk-forge
 #    /plugin → Discover → fake-data → Install for you
 #    Restart Claude Code or run /reload-plugins
 ```
 
-**Important:** The folder MUST be renamed from `fake-data-main` (the GitHub ZIP default) to `lyders-splunk-tools`. The folder name is what Claude Code uses to identify the marketplace.
+**Important:** The folder MUST be renamed from `fake-data-main` (the GitHub ZIP default) to `splunk-forge`. The folder name is what Claude Code uses to identify the marketplace.
 
 **Updating later:** Repeat steps 1-4 with a fresh ZIP, then run `/reload-plugins` in Claude Code. (Or just use `git clone` from Option 2 — much easier for repeat updates.)
 
@@ -100,7 +100,7 @@ After installation (any method), open Claude Code in any directory. You should s
 
 1. **SessionStart announcement** at the top: `🎯 FAKE_DATA plugin loaded — 8 skills available...`
 2. **Skills available** when you type `/fake` or `/fd-` — both `fake-data:fd-init` and `/fd-init` should work
-3. **`/plugin → Installed`** lists `fake-data` from marketplace `lyders-splunk-tools`
+3. **`/plugin → Installed`** lists `fake-data` from marketplace `splunk-forge`
 
 ## Quick start
 
