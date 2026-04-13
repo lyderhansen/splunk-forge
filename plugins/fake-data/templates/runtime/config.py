@@ -3,8 +3,7 @@
 Configuration module for FAKE_DATA generators.
 Contains shared constants, volume parameters, and output path management.
 
-Ported from TA-FAKE-TSHRT shared/config.py — all organization-specific
-references removed. This file is generic and works with any world.py.
+Generic and works with any world.py — no organization-specific references.
 """
 
 from datetime import date

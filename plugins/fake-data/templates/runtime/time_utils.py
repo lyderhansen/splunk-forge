@@ -4,8 +4,6 @@ Timestamp formatting and natural volume calculation utilities.
 
 Provides consistent timestamp generation across all log formats and
 realistic hourly/daily volume variation via calc_natural_events().
-
-Ported from TA-FAKE-TSHRT shared/time_utils.py — generic, no org references.
 """
 
 import random

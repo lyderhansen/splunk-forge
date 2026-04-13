@@ -65,7 +65,7 @@ with runtime bootstrap, verification, and handoff.
 Files: `.claude/skills/fd-discover/SKILL.md`, `.claude/skills/fd-discover/canary/`,
        `.claude/skills/fd-add-generator/SKILL.md` (updated for SPEC.py auto-detection)
 
-Ports the discover-logformat skill from TA-FAKE-TSHRT to the FAKE_DATA plugin.
+Initial implementation of the discover-logformat skill for the FAKE_DATA plugin.
 Subagent-based research (vendor docs, Splunkbase, sample search), format detection
 (8 patterns), field extraction, confidence gates, SPEC.py output. Preset check
 shortcuts research when bundled preset exists. Infrastructure suggestions in handoff.
