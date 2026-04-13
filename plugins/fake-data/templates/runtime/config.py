@@ -15,7 +15,17 @@ from typing import List
 # DEFAULT SETTINGS
 # =============================================================================
 
-DEFAULT_START_DATE = "2026-01-01"
+def _current_month_start() -> str:
+    """Default start_date is the first of the current UTC month.
+
+    Ensures demo data always looks fresh regardless of when it's
+    generated. Override with --start-date=YYYY-MM-DD.
+    """
+    today = date.today()
+    return today.replace(day=1).isoformat()
+
+
+DEFAULT_START_DATE = _current_month_start()
 DEFAULT_DAYS = 31
 DEFAULT_SCALE = 1.0
 
@@ -202,31 +212,41 @@ def discover_scenarios() -> dict:
     return discovered
 
 
-def expand_scenarios(scenarios: str) -> list:
+def expand_scenarios(scenarios: str, start_date: str = None) -> list:
     """Expand a scenario specification string into active scenario instances.
 
     Args:
         scenarios: Comma-separated list of scenario names, "all", or "none".
+        start_date: Base date for scenario timestamps (YYYY-MM-DD). Each
+            returned scenario instance gets ``start_date`` set so its
+            ``_hour`` methods can anchor events to the same calendar day
+            baseline events use. Defaults to DEFAULT_START_DATE.
 
     Returns:
-        List of scenario instances.
+        List of scenario instances with ``start_date`` populated.
     """
     if scenarios == "none":
         return []
 
+    if start_date is None:
+        start_date = DEFAULT_START_DATE
+
     discovered = discover_scenarios()
 
     if scenarios == "all":
-        return [info["instance"] for info in discovered.values()]
+        instances = [info["instance"] for info in discovered.values()]
+    else:
+        names = [n.strip() for n in scenarios.split(",")]
+        instances = []
+        for name in names:
+            if name in discovered:
+                instances.append(discovered[name]["instance"])
+            else:
+                print(f"  Warning: scenario '{name}' not found, skipping")
 
-    names = [n.strip() for n in scenarios.split(",")]
-    active = []
-    for name in names:
-        if name in discovered:
-            active.append(discovered[name]["instance"])
-        else:
-            print(f"  Warning: scenario '{name}' not found, skipping")
-    return active
+    for inst in instances:
+        inst.start_date = start_date
+    return instances
 
 
 # =============================================================================

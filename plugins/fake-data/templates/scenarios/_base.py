@@ -19,6 +19,16 @@ class BaseScenario:
 
     def __init__(self, config=None):
         self.config = config or self.default_config()
+        # start_date is populated by expand_scenarios() before the first
+        # _hour() call. Scenario _hour methods MUST use self.start_date
+        # when building timestamps so baseline + scenario events share
+        # the same calendar anchor. Falls back to DEFAULT_START_DATE if
+        # a scenario is instantiated directly for testing.
+        try:
+            from fake_data.config import DEFAULT_START_DATE
+            self.start_date = DEFAULT_START_DATE
+        except ImportError:
+            self.start_date = None
         self._resolve_auto_values()
 
     def default_config(self):

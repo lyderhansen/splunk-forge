@@ -93,7 +93,7 @@ def generate_TEMPLATE_logs(
     Returns the number of events generated.
     """
     events = []
-    active_scenarios = expand_scenarios(scenarios)
+    active_scenarios = expand_scenarios(scenarios, start_date=start_date)
 
     for day in range(days):
         if progress_callback:

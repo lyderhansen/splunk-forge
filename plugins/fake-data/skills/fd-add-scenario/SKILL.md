@@ -428,7 +428,27 @@ if __name__ == "__main__":
 - Event strings must match the format of the target generator (KV, JSON, syslog, etc.).
   Read the target generator files if needed to match their format exactly.
 - PascalCase class names: `brute_force` -> `BruteForce`, `disk_filling` -> `DiskFilling`.
-- Use `ts_iso` from `fake_data.time_utils` for timestamps.
+- **Use `ts_iso(self.start_date, day, hour, minute, second)` for timestamps** —
+  never hardcode a year like `datetime(2026, 1, 1) + timedelta(days=day)`.
+  The scenario instance has `self.start_date` populated by `expand_scenarios()`
+  so baseline events and scenario events share the same calendar anchor.
+  When the user runs `main_generate.py --start-date=2026-07-15`, both
+  shift to July 2026 together. Hardcoding causes scenario events to
+  "ghost" on the wrong date while baseline events move — the single
+  worst temporal inconsistency a demo can have.
+
+  Correct pattern inside a `_hour` method:
+  ```python
+  def fortigate_hour(self, day: int, hour: int) -> list:
+      if not self.is_active(day):
+          return []
+      events = []
+      for _ in range(8):
+          ts = ts_iso(self.start_date, day, hour,
+                      random.randint(0, 59), random.randint(0, 59))
+          events.append(f"date=... time=... demo_id={self.meta()['scenario_id']} ...")
+      return events
+  ```
 
 ### E.3 Syntax check
 
