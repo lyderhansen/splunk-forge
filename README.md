@@ -1,28 +1,85 @@
-# FAKE_DATA
+# fake-data — FAKE_DATA plugin
 
-> An A-to-Z Claude Code plugin for generating synthetic Splunk data.
+> An A-to-Z Claude Code plugin for generating synthetic Splunk log data.
 
-FAKE_DATA helps you build a fictional world (organization, locations, users, infrastructure) and then research, scaffold, and run Python generators that produce realistic log events for Splunk ingestion. It covers the entire pipeline from "install plugin" to "data in Splunk" — including scenario-driven attack and ops incident simulation, interactive world editing, and Splunk TA generation.
+**Plugin name:** `fake-data` (on disk, in manifests)
+**Brand name:** FAKE_DATA (in docs, user-facing strings)
+
+FAKE_DATA helps you build a fictional world (organization, locations, users, infrastructure) and then research, scaffold, and run Python generators that produce realistic log events for Splunk ingestion. It covers the entire pipeline from "install plugin" to "data in Splunk" — including scenario-driven attack and ops incident simulation, interactive world editing, Splunk CIM alignment, and Splunk TA generation.
+
+## Installation
+
+**Option 1 — Clone into Claude Code plugins directory:**
+```bash
+git clone https://github.com/lyderhansen/fake-data.git ~/.claude/plugins/fake-data
+```
+
+**Option 2 — Symlink (for development):**
+```bash
+git clone https://github.com/lyderhansen/fake-data.git ~/code/fake-data
+ln -s ~/code/fake-data ~/.claude/plugins/fake-data
+```
+
+Once installed, open Claude Code in any directory. You should see `fake-data:fd-*` skills available (or search for `/fake` to find them). The SessionStart hook will announce the plugin on startup.
+
+## Quick start
+
+**One-shot mode (YOLO) — from zero to Splunk TA:**
+```bash
+mkdir my-demo && cd my-demo
+/fd-init firewall.log --description="SOC demo for energy company" --scenario="brute_force" --yolo
+```
+
+That's it. YOLO mode runs the entire pipeline automatically and stops at the packaging step for confirmation.
+
+**Step-by-step:**
+```bash
+mkdir my-demo && cd my-demo
+/fd-init                          # Create workspace (interactive wizard)
+/fd-discover fortigate            # Research the log format
+/fd-add-generator fortigate       # Scaffold the Python generator
+/fd-cim fortigate                 # Map fields to Splunk CIM
+/fd-add-scenario brute_force      # Create a correlated attack scenario
+/fd-generate                      # Produce log files
+/fd-build-app                     # Package as installable Splunk TA
+```
 
 ## Pipeline
 
 ```
-/fd-init  →  /fd-discover  →  /fd-add-generator  →  /fd-add-scenario  →  /fd-generate  →  /fd-build-app
-   ↓              ↓                  ↓                     ↓                   ↓               ↓
- world.py      SPEC.py        generator.py          scenario.py          log files        Splunk TA
+/fd-init → /fd-discover → /fd-add-generator → /fd-cim → /fd-add-scenario → /fd-generate → /fd-build-app
+    ↓           ↓                ↓               ↓              ↓                ↓               ↓
+ world.py    SPEC.py      generator.py    CIM_MAPPING   scenario.py       log files     TA-*.tar.gz
 ```
+
+Each skill offers to chain to the next, so you rarely need to type more than one command in a row.
 
 ## Skills
 
 | Skill | What it does |
 |-------|-------------|
-| `/fd-init` | Create a workspace with a fictional org — world.py with users, locations, infrastructure, network config. Quick/custom/just-data modes. Researches real companies to prefill defaults. |
-| `/fd-discover` | Research a log format (e.g. "fortigate") using vendor docs, Splunkbase, and samples. Produces a SPEC.py with fields, format, and confidence scores. |
+| `/fd-init` | Create a workspace with a fictional org — world.py with users, locations, infrastructure, network config. Quick/custom/just-data/YOLO modes. Researches real companies to prefill defaults. |
+| `/fd-discover` | Research a log format (e.g. "fortigate") using vendor docs, Splunkbase, and samples. Produces a `SPEC.py`. Checks bundled presets first for instant match. |
 | `/fd-add-generator` | Scaffold a Python log generator from a SPEC.py or interactive wizard. Auto-detects format, fields, and volume patterns. |
-| `/fd-add-scenario` | Create multi-phase scenarios (attacks, ops incidents, network issues) with research-driven event generation. Events are correlated across generators via `demo_id`. |
+| `/fd-add-scenario` | Create multi-phase scenarios (attacks, ops incidents, network issues) with research-driven event generation. Events correlated across generators via `demo_id`. |
 | `/fd-world` | View and edit the organization's world state. Add/edit/remove users, locations, and infrastructure with review gates. |
 | `/fd-generate` | Guided generation wizard. Also ships a curses TUI (`python3 fake_data/tui_generate.py`) for offline interactive use. |
+| `/fd-cim` | Map generator fields to Splunk CIM data models (Network_Traffic, Authentication, Endpoint, etc.) with rule-based matching and research fallback. |
 | `/fd-build-app` | Generate a Splunk Technology Add-on (TA) with inputs.conf, props.conf, transforms.conf, CIM alignment, and tar.gz packaging. |
+
+## Bundled presets (21)
+
+Pre-built log format specs for common Splunk sources. `/fd-discover <source>` checks these first and skips research if a match is found.
+
+**Network/firewall:** fortigate, cisco_asa, cisco_ios, palo_alto_traffic, cisco_meraki_mx, checkpoint_traffic
+**Cloud:** aws_cloudtrail, aws_guardduty, entraid_signin, gcp_audit, o365_management
+**Endpoint:** wineventlog_security, sysmon, crowdstrike_falcon
+**Linux:** linux_auth
+**Web:** apache_access, nginx_access
+**Collaboration:** cisco_webex
+**ITSM/ERP/DB:** servicenow_incident, sap_audit, mssql_errorlog
+
+See [`presets/README.md`](presets/README.md) for the full catalog with Splunkbase references.
 
 ## Architecture
 
@@ -37,6 +94,8 @@ When `/fd-init` runs, it copies Python templates into the user's repo. There is 
 
 ### Workspace structure
 
+After `/fd-init` the user's directory looks like this:
+
 ```
 your-repo/
 └── fake_data/
@@ -46,20 +105,12 @@ your-repo/
     ├── time_utils.py        # timestamp formatters
     ├── main_generate.py     # orchestrator (filesystem discovery, topo sort)
     ├── tui_generate.py      # curses TUI for interactive generation
-    ├── generators/
-    │   ├── generate_fortigate.py   # each generator has SOURCE_META
-    │   ├── generate_linux.py
-    │   └── ...
-    ├── scenarios/
-    │   ├── _base.py                # BaseScenario with auto-resolver
-    │   ├── brute_force.py          # each scenario has SCENARIO_META
-    │   └── ...
-    ├── output/                     # generated log files
-    │   ├── network/fortigate.log
-    │   └── ...
-    └── splunk_app/                 # generated Splunk TA
-        ├── TA-YOURORG/
-        └── TA-YOURORG.tar.gz
+    ├── generators/          # each generator has SOURCE_META
+    ├── scenarios/           # each scenario has SCENARIO_META
+    │   └── _base.py         # BaseScenario with auto-resolver
+    ├── cim/                 # CIM mappings per generator (from /fd-cim)
+    ├── output/              # generated log files
+    └── splunk_app/          # generated Splunk TA (from /fd-build-app)
 ```
 
 ### Key patterns
@@ -70,37 +121,25 @@ your-repo/
 
 **Scenario correlation:** Every scenario event includes a `demo_id` field. The Splunk TA extracts this as an indexed field (`IDX_demo_id`) for fast `tstats` correlation across sourcetypes.
 
-**Research-driven scaffolding:** `/fd-discover` and `/fd-add-scenario` use Claude subagents to research vendor documentation, log formats, attack techniques, and CIM mappings. Results are structured and parsed — the user gets working code, not just documentation.
+**Research-driven scaffolding:** `/fd-discover`, `/fd-add-scenario`, and `/fd-cim` use Claude subagents to research vendor documentation, log formats, attack techniques, and CIM mappings. Results are structured and parsed — the user gets working code, not just documentation.
 
 **Dependency management:** Generators declare `depends_on` in SOURCE_META. The orchestrator topologically sorts them before execution. The TUI auto-includes dependencies with `[+]` markers.
 
-## Quick start
+## Plugin layout
 
-```bash
-# 1. Install the plugin (from the fake-data directory)
-cd fake-data
-
-# 2. Create a workspace in any empty directory
-cd /path/to/your/repo
-/fd-init
-
-# 3. Discover and create a generator
-/fd-discover fortigate
-/fd-add-generator fortigate
-
-# 4. Create a scenario
-/fd-add-scenario brute_force
-
-# 5. Generate logs
-python3 fake_data/main_generate.py --days=7 --scenarios=brute_force
-
-# 6. Build Splunk app
-/fd-build-app
 ```
-
-## Design process
-
-This plugin is built using the superpowers workflow: brainstorming → spec → plan → subagent-driven execution. Design documents live in `docs/superpowers/specs/`, implementation plans in `docs/superpowers/plans/`.
+fake-data/
+├── .claude-plugin/plugin.json    # plugin manifest
+├── skills/                       # 8 Claude Code skills
+├── hooks/                        # SessionStart announcement
+├── templates/                    # runtime files copied by /fd-init
+├── data/                         # name + IP data (used by skills)
+├── presets/                      # 21 bundled log format specs
+├── README.md
+├── CLAUDE.md
+├── CHANGEHISTORY.md
+└── LICENSE
+```
 
 ## Lineage
 
@@ -108,4 +147,4 @@ FAKE_DATA is a standalone reimplementation of the skills and framework originall
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE)
