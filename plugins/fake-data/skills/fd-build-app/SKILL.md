@@ -158,24 +158,13 @@ Normalize the user's answer:
 
 If the user provided an app name as the skill argument, use it (still normalize).
 
-### B.2 Log file location (no longer asked)
-
-Logs are now bundled INSIDE the app at `<APP_NAME>/logs/`. The generated
-`inputs.conf` uses `$SPLUNK_HOME/etc/apps/<APP_NAME>/logs/...` so the app is
-fully portable — copy it to any Splunk install and it just works.
-
-Skip this question. Phase E will:
-1. Copy `fake_data/output/*` into `<APP_NAME>/logs/` (pre-generated turnkey data)
-2. Copy the generator runtime into `<APP_NAME>/bin/` so the user can re-run
-   `python3 main_generate.py` from inside the installed app to regenerate.
-
-### B.3 Index
+### B.2 Index
 
 > "Splunk index name? [main]"
 
 Used in every `inputs.conf` monitor stanza.
 
-### B.4 CIM level
+### B.3 CIM level
 
 > "CIM alignment level?
 >   - **full**: Field aliases, lookups, eventtypes, tags -- data is Splunk ES ready
