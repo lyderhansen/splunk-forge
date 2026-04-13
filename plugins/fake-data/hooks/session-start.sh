@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 # FAKE_DATA plugin SessionStart hook — announces plugin availability
 
+# Read version from plugin.json (sibling .claude-plugin dir)
+PLUGIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+VERSION=$(grep -E '"version"\s*:' "$PLUGIN_DIR/.claude-plugin/plugin.json" 2>/dev/null \
+  | head -1 | sed -E 's/.*"version"[^"]*"([^"]+)".*/\1/')
+VERSION=${VERSION:-unknown}
+
 # Output is injected into Claude's context at session start
-cat <<'EOF'
-🎯 FAKE_DATA plugin loaded — 8 skills available for synthetic Splunk log generation:
+cat <<EOF
+🎯 FAKE_DATA plugin v${VERSION} loaded — 8 skills available for synthetic Splunk log generation:
 
   /fd-init          Create a FAKE_DATA workspace (add --yolo for full auto-pipeline)
   /fd-discover      Research a log format from docs, samples, or free text
