@@ -54,3 +54,38 @@ def test_enrich_user_preserves_existing_fields():
     assert out["email"] == "alice.adams@example.com"
     assert out["workstation_ip"] == "10.10.10.1"
     assert out["user_id"] == "existing-user-id-value"  # not overwritten
+
+
+def test_enrich_user_adds_aws_principal_id():
+    from world_enrich import enrich_user
+    out = enrich_user(SAMPLE_USER, workspace_name="ws1")
+    assert out["aws_principal_id"].startswith("AROA")
+    assert len(out["aws_principal_id"]) == 16  # AROA + 12 hex-ish chars
+
+
+def test_enrich_user_adds_vpn_ip_in_172_20_range():
+    from world_enrich import enrich_user
+    out = enrich_user(SAMPLE_USER, workspace_name="ws1")
+    ip = out["vpn_ip"]
+    octets = ip.split(".")
+    assert len(octets) == 4
+    assert octets[0] == "172"
+    assert octets[1] == "20"
+    for octet in octets:
+        n = int(octet)
+        assert 0 <= n <= 255
+
+
+def test_enrich_user_adds_employee_id_with_index():
+    from world_enrich import enrich_user
+    out = enrich_user(SAMPLE_USER, workspace_name="ws1", index=42)
+    assert out["employee_id"] == "E10042"
+
+
+def test_enrich_user_all_new_fields_deterministic():
+    from world_enrich import enrich_user
+    a = enrich_user(SAMPLE_USER, workspace_name="ws1", index=7)
+    b = enrich_user(SAMPLE_USER, workspace_name="ws1", index=7)
+    assert a["aws_principal_id"] == b["aws_principal_id"]
+    assert a["vpn_ip"] == b["vpn_ip"]
+    assert a["employee_id"] == b["employee_id"]
