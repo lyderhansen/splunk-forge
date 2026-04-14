@@ -2,6 +2,14 @@
 
 Newest entries first.
 
+## 2026-04-14 20:46 UTC — v0.6.0 — Narrative foundation (#79a)
+
+- Add `templates/runtime/narrative.py` stub module with ACTORS, STORYLINE, JOIN_KEYS constants and get_actor/get_phase/has_scenario_events helpers. Shipped empty; populated by fd-init when the user opts into a demo narrative.
+- Add `templates/runtime/correlation.py` with deterministic `active_user(day, hour, users, bucket_hours=4)` and `active_host(day, hour, infra, category)` fallback pickers. Used when narrative.py is absent or has empty ACTORS.
+- Add `data/world_enrich.py` with `enrich_user`, `enrich_infra`, and batch helpers that add `entra_object_id`, `aws_principal_id`, `vpn_ip`, `employee_id`, `mac_address`, and `asset_tag` with deterministic seeding on `(workspace_name, identifier, field)`.
+- Add pytest harness at `plugins/fake-data/tests/` with full coverage for the three new modules (36 tests).
+- No skill changes in this release. Generator, fd-init wizard, and scenario/build-app integration land in #79b–e.
+
 ## 2026-04-12 ~10:00 UTC — Bundled presets library
 Files: `presets/*.py` (20 files), `presets/README.md`
 
