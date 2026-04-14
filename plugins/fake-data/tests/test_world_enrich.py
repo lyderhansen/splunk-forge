@@ -89,3 +89,46 @@ def test_enrich_user_all_new_fields_deterministic():
     assert a["aws_principal_id"] == b["aws_principal_id"]
     assert a["vpn_ip"] == b["vpn_ip"]
     assert a["employee_id"] == b["employee_id"]
+
+
+SAMPLE_INFRA = {
+    "hostname": "SRV-HQ1-01",
+    "ip": "10.10.0.10",
+    "location": "HQ1",
+    "role": "server",
+    "description": "General purpose server",
+}
+
+
+def test_enrich_infra_adds_mac_address():
+    from world_enrich import enrich_infra
+    out = enrich_infra(SAMPLE_INFRA, workspace_name="ws1")
+    assert "mac_address" in out
+    parts = out["mac_address"].split(":")
+    assert len(parts) == 6
+    for p in parts:
+        assert len(p) == 2
+        int(p, 16)  # must be valid hex
+
+
+def test_enrich_infra_adds_asset_tag():
+    from world_enrich import enrich_infra
+    out = enrich_infra(SAMPLE_INFRA, workspace_name="ws1", index=3)
+    assert out["asset_tag"] == "AST-HQ1-0003"
+
+
+def test_enrich_infra_deterministic():
+    from world_enrich import enrich_infra
+    a = enrich_infra(SAMPLE_INFRA, workspace_name="ws1", index=3)
+    b = enrich_infra(SAMPLE_INFRA, workspace_name="ws1", index=3)
+    assert a["mac_address"] == b["mac_address"]
+    assert a["asset_tag"] == b["asset_tag"]
+
+
+def test_enrich_infra_preserves_existing_fields():
+    from world_enrich import enrich_infra
+    out = enrich_infra(SAMPLE_INFRA, workspace_name="ws1")
+    assert out["hostname"] == "SRV-HQ1-01"
+    assert out["ip"] == "10.10.0.10"
+    assert out["location"] == "HQ1"
+    assert out["role"] == "server"

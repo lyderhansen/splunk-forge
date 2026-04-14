@@ -64,3 +64,28 @@ def enrich_user(user: dict, workspace_name: str, index: int = 0) -> dict:
     if not out.get("employee_id"):
         out["employee_id"] = _make_employee_id(index)
     return out
+
+
+def _make_infra_mac(workspace_name: str, hostname: str) -> str:
+    """Return a deterministic MAC address with the locally-administered OUI 02:1A:2B."""
+    h = _hex_hash(workspace_name, hostname, "mac", 6)
+    return f"02:1A:2B:{h[0:2]}:{h[2:4]}:{h[4:6]}".upper()
+
+
+def _make_asset_tag(location: str, index: int) -> str:
+    """Return an asset tag of the form AST-<LOCATION>-<4-digit-index>."""
+    return f"AST-{location}-{index:04d}"
+
+
+def enrich_infra(infra: dict, workspace_name: str, index: int = 0) -> dict:
+    """Return a copy of infra host with mac_address and asset_tag added.
+
+    Preserves all existing keys. Only adds fields that are absent or empty.
+    """
+    out = dict(infra)
+    hostname = out["hostname"]
+    if not out.get("mac_address"):
+        out["mac_address"] = _make_infra_mac(workspace_name, hostname)
+    if not out.get("asset_tag"):
+        out["asset_tag"] = _make_asset_tag(out["location"], index)
+    return out
