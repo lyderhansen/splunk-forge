@@ -89,3 +89,26 @@ def enrich_infra(infra: dict, workspace_name: str, index: int = 0) -> dict:
     if not out.get("asset_tag"):
         out["asset_tag"] = _make_asset_tag(out["location"], index)
     return out
+
+
+def enrich_users_list(users: list, workspace_name: str) -> list:
+    """Enrich every user in the list with deterministic stable IDs.
+
+    Returns a new list. The index of each user becomes its employee_id
+    suffix. Safe to call on already-enriched lists.
+    """
+    return [
+        enrich_user(u, workspace_name=workspace_name, index=i)
+        for i, u in enumerate(users)
+    ]
+
+
+def enrich_infra_list(infra: list, workspace_name: str) -> list:
+    """Enrich every infra host in the list with mac_address and asset_tag.
+
+    Returns a new list. asset_tag uses the host's index within the list.
+    """
+    return [
+        enrich_infra(h, workspace_name=workspace_name, index=i)
+        for i, h in enumerate(infra)
+    ]

@@ -132,3 +132,38 @@ def test_enrich_infra_preserves_existing_fields():
     assert out["ip"] == "10.10.0.10"
     assert out["location"] == "HQ1"
     assert out["role"] == "server"
+
+
+def test_enrich_users_list_applies_to_all():
+    from world_enrich import enrich_users_list
+    users = [
+        dict(SAMPLE_USER, username="alice.a"),
+        dict(SAMPLE_USER, username="bob.b"),
+        dict(SAMPLE_USER, username="carol.c"),
+    ]
+    out = enrich_users_list(users, workspace_name="ws1")
+    assert len(out) == 3
+    for i, u in enumerate(out):
+        assert "entra_object_id" in u
+        assert "vpn_ip" in u
+        assert u["employee_id"] == f"E{10000 + i}"
+
+
+def test_enrich_users_list_produces_unique_ids():
+    from world_enrich import enrich_users_list
+    users = [dict(SAMPLE_USER, username=f"user{i}") for i in range(5)]
+    out = enrich_users_list(users, workspace_name="ws1")
+    ids = {u["entra_object_id"] for u in out}
+    assert len(ids) == 5
+
+
+def test_enrich_infra_list_applies_to_all():
+    from world_enrich import enrich_infra_list
+    infra = [
+        dict(SAMPLE_INFRA, hostname=f"HOST-{i:02d}") for i in range(3)
+    ]
+    out = enrich_infra_list(infra, workspace_name="ws1")
+    assert len(out) == 3
+    for i, h in enumerate(out):
+        assert h["asset_tag"] == f"AST-HQ1-{i:04d}"
+        assert "mac_address" in h
