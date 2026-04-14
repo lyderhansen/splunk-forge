@@ -36,3 +36,25 @@ def active_user(
         return None
     seed = _bucket_seed(day, hour, bucket_hours, salt="user")
     return users[seed % len(users)]
+
+
+def active_host(
+    day: int,
+    hour: int,
+    infra: list,
+    category: Optional[str] = None,
+    bucket_hours: int = 4,
+) -> Optional[dict]:
+    """Return a deterministic "currently active" host for this time bucket.
+
+    If category is provided, only hosts with a matching "category" field
+    are considered. Returns None if no host matches.
+    """
+    if not infra:
+        return None
+    pool = [h for h in infra if category is None or h.get("category") == category]
+    if not pool:
+        return None
+    salt = f"host:{category or ''}"
+    seed = _bucket_seed(day, hour, bucket_hours, salt=salt)
+    return pool[seed % len(pool)]
