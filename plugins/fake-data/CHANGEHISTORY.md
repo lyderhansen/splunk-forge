@@ -2,6 +2,13 @@
 
 Newest entries first.
 
+## 2026-04-15 — v0.6.1 — fd-build-app packaging fix for macOS AppleDouble
+
+- Fix Splunk "archive contains more than one immediate subdirectory" rejection caused by BSD tar emitting `._<APP_NAME>` AppleDouble entries from extended attributes during archiving. OneDrive-synced source trees were the common trigger.
+- `fd-build-app` Phase F.1: add `xattr -cr` to strip extended attributes before tar.
+- `fd-build-app` Phase F.2: prefix tar command with `COPYFILE_DISABLE=1` so BSD tar does not synthesize AppleDouble entries from xattrs.
+- `fd-build-app` Phase F.3: hard-fail the build if the produced tarball contains more than one top-level entry or a top-level entry that is not `<APP_NAME>`. Prevents shipping packages Splunk will reject.
+
 ## 2026-04-14 20:46 UTC — v0.6.0 — Narrative foundation (#79a)
 
 - Add `templates/runtime/narrative.py` stub module with ACTORS, STORYLINE, JOIN_KEYS constants and get_actor/get_phase/has_scenario_events helpers. Shipped empty; populated by fd-init when the user opts into a demo narrative.

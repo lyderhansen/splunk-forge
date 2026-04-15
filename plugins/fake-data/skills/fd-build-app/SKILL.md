@@ -1043,30 +1043,56 @@ inspect the patched config.py and the wrapper.
 
 ## Phase F -- Package
 
-### F.1 Clean Mac artifacts
+### F.1 Clean Mac artifacts and extended attributes
 
-Run via Bash from the workspace root:
+Run via Bash from the workspace root. The first three `find` commands
+remove materialized AppleDouble, DS_Store, and `__MACOSX` files. The
+`xattr -cr` command strips extended attributes from every file in the
+source tree so that BSD tar will not re-create AppleDouble (`._*`)
+entries from xattrs during archiving. This step is critical on macOS —
+without it, OneDrive-synced source trees will produce tarballs that
+Splunk rejects with "archive contains more than one immediate
+subdirectory: <hidden> and <APP_NAME>".
 
 ```bash
 find fake_data/splunk_app/<APP_NAME> -name '.DS_Store' -delete 2>/dev/null
 find fake_data/splunk_app/<APP_NAME> -name '._*' -delete 2>/dev/null
 find fake_data/splunk_app/<APP_NAME> -name '__MACOSX' -type d -exec rm -rf {} + 2>/dev/null
+xattr -cr fake_data/splunk_app/<APP_NAME> 2>/dev/null || true
 ```
 
 ### F.2 Create tar.gz package
 
+`COPYFILE_DISABLE=1` tells BSD tar on macOS not to emit AppleDouble
+entries from extended attributes. Combined with the xattr strip above,
+this guarantees a single top-level directory in the archive.
+
 ```bash
-cd fake_data/splunk_app && tar -czf <APP_NAME>.tar.gz <APP_NAME>/
+cd fake_data/splunk_app && COPYFILE_DISABLE=1 tar -czf <APP_NAME>.tar.gz <APP_NAME>/
 ```
 
-### F.3 Verify package
+### F.3 Verify package — HARD FAIL on more than one top-level entry
+
+Splunk's app installer rejects any tarball with more than one immediate
+subdirectory. Verify by counting unique top-level entries; fail the
+build if the count is anything other than 1.
 
 ```bash
+TOP=$(tar -tzf fake_data/splunk_app/<APP_NAME>.tar.gz | awk -F/ '{print $1}' | sort -u)
+COUNT=$(printf '%s\n' "$TOP" | grep -c . || true)
+if [ "$COUNT" != "1" ] || [ "$TOP" != "<APP_NAME>" ]; then
+  echo "ERROR: tarball has unexpected top-level entries:" >&2
+  printf '%s\n' "$TOP" >&2
+  echo "Splunk will reject this archive. Re-run F.1 and F.2." >&2
+  exit 1
+fi
 tar -tzf fake_data/splunk_app/<APP_NAME>.tar.gz | head -20
 ```
 
-Confirm the output shows the expected directory structure with `<APP_NAME>/`
-as the top-level directory. If the structure looks wrong, diagnose and re-package.
+If the hard-fail block triggers, the typical culprits are (in order):
+macOS extended attributes that survived `xattr -cr`, a stray dot-file
+inside the app directory (re-run F.1), or OneDrive sync placeholder
+files. Never ship a tarball that did not pass F.3.
 
 ---
 
